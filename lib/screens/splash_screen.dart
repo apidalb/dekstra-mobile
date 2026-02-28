@@ -1,0 +1,153 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_theme.dart';
+import 'login_screen.dart';
+import 'register_screen.dart';
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _fadeAnimation =
+        CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.2),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.surface,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(flex: 2),
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: Column(
+                    children: [
+                      // ── Logo ─────────────────────────────────────────
+                      // Ganti dengan:
+                      // Image.asset('assets/images/logo.png', width: 140, height: 140)
+                      Image.asset('assets/images/logo.png', width: 240, height: 240),
+                      const SizedBox(height: 16),
+                      Text(
+                        'DESKTRA',
+                        style: GoogleFonts.poppins(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.primary,
+                          // letterSpacing: 3,
+                        ),
+                      ),
+                      const SizedBox(height: 48),
+                      Text(
+                        "Let's get started!",
+                        style: GoogleFonts.poppins(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Lorem Ipsum',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: AppTheme.textSecondary,
+                          height: 1.6,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const Spacer(flex: 2),
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => const LoginScreen())),
+                      child: const Text('MASUK'),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: () => Navigator.push(context,
+                          MaterialPageRoute(
+                              builder: (_) => const RegisterScreen())),
+                      child: const Text('DAFTAR'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class LogoPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppTheme.primary
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    path.moveTo(size.width * 0.15, size.height * 0.3);
+    path.lineTo(size.width * 0.65, size.height * 0.5);
+    path.lineTo(size.width * 0.15, size.height * 0.7);
+    path.lineTo(size.width * 0.25, size.height * 0.5);
+    path.close();
+
+    final path2 = Path();
+    path2.moveTo(size.width * 0.4, size.height * 0.3);
+    path2.lineTo(size.width * 0.9, size.height * 0.5);
+    path2.lineTo(size.width * 0.4, size.height * 0.7);
+    path2.lineTo(size.width * 0.5, size.height * 0.5);
+    path2.close();
+
+    canvas.drawPath(path, paint);
+    paint.color = AppTheme.primary.withOpacity(0.5);
+    canvas.drawPath(path2, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
