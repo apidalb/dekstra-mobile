@@ -1,354 +1,367 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
+import 'surat/umum/surat_keterangan_usaha_screen.dart';
+import 'surat/umum/surat_keterangan_tempat_usaha_screen.dart';
+import 'surat/umum/surat_pengantar_barang_screen.dart';
+import 'surat/umum/surat_keterangan_tidak_mampu_screen.dart';
+import 'surat/umum/permohonan_izin_keramaian_screen.dart';
+import 'surat/umum/surat_pengantar_skck_screen.dart';
+import 'surat/umum/surat_keterangan_ahli_waris_screen.dart';
+import 'surat/umum/surat_keterangan_lainnya_screen.dart';
 
-class LayananScreen extends StatelessWidget {
+// ── Data Model ────────────────────────────────────────────────────────────────
+class _JenisSurat {
+  final String nama;
+  final String deskripsi;
+
+  const _JenisSurat({required this.nama, required this.deskripsi});
+}
+
+// ── Data dummy surat ──────────────────────────────────────────────────────────
+const List<_JenisSurat> _layananUmum = [
+  _JenisSurat(
+    nama: 'Surat Keterangan Usaha',
+    deskripsi: 'Surat yang menerangkan bahwa warga memiliki atau menjalankan suatu usaha di wilayah desa.',
+  ),
+  _JenisSurat(
+    nama: 'Surat Keterangan Tempat Usaha',
+    deskripsi: 'Surat yang menyatakan lokasi dan keberadaan tempat usaha warga secara resmi.',
+  ),
+  _JenisSurat(
+    nama: 'Surat Keterangan Pengantar Barang',
+    deskripsi: 'Surat pengantar untuk membawa atau mengirim barang dalam wilayah tertentu.',
+  ),
+  _JenisSurat(
+    nama: 'Surat Keterangan Tidak Mampu (Sekolah)',
+    deskripsi: 'Surat yang menyatakan warga kurang mampu secara ekonomi untuk keperluan pendidikan.',
+  ),
+  _JenisSurat(
+    nama: 'Permohonan Izin Keramaian / Pesta',
+    deskripsi: 'Surat permohonan izin untuk menyelenggarakan acara atau pesta di wilayah desa.',
+  ),
+  _JenisSurat(
+    nama: 'Surat Pengantar SKCK',
+    deskripsi: 'Surat pengantar dari desa sebagai syarat pembuatan Surat Keterangan Catatan Kepolisian (SKCK).',
+  ),
+  _JenisSurat(
+    nama: 'Surat Keterangan Ahli Waris',
+    deskripsi: 'Surat yang menetapkan seseorang atau beberapa orang sebagai ahli waris sah.',
+  ),
+  _JenisSurat(
+    nama: 'Surat Keterangan Lainnya',
+    deskripsi: 'Surat keterangan umum yang diterbitkan oleh desa untuk keperluan tertentu yang tidak termasuk dalam kategori surat yang telah tersedia.',
+  ),
+];
+
+const List<_JenisSurat> _layananKependudukan = [
+  _JenisSurat(
+    nama: 'Formulir Kartu Keluarga (F-1.01)',
+    deskripsi: 'Formulir pengganti Kartu Keluarga untuk pencatatan data seluruh anggota keluarga dalam satu rumah tangga.',
+  ),
+  _JenisSurat(
+    nama: 'Formulir Pendaftaran Peristiwa Kependudukan (F-1.02)',
+    deskripsi: 'Formulir untuk mendaftarkan peristiwa kependudukan seperti perubahan alamat atau status kependudukan.',
+  ),
+  _JenisSurat(
+    nama: 'Formulir Permohonan KK Baru WNI (F-1.15)',
+    deskripsi: 'Formulir permohonan pembuatan Kartu Keluarga baru bagi Warga Negara Indonesia.',
+  ),
+  _JenisSurat(
+    nama: 'Formulir Permohonan Perubahan KK WNI (F-1.16)',
+    deskripsi: 'Formulir permohonan perubahan data pada Kartu Keluarga bagi Warga Negara Indonesia.',
+  ),
+  _JenisSurat(
+    nama: 'Formulir Permohonan KTP (F-1.21)',
+    deskripsi: 'Formulir permohonan pembuatan atau perpanjangan Kartu Tanda Penduduk.',
+  ),
+  _JenisSurat(
+    nama: 'Surat Keterangan Domisili',
+    deskripsi: 'Surat yang menerangkan tempat tinggal atau domisili warga secara resmi di wilayah desa.',
+  ),
+  _JenisSurat(
+    nama: 'Surat Keterangan Hilang Kartu Keluarga',
+    deskripsi: 'Surat keterangan yang menyatakan bahwa Kartu Keluarga milik warga telah hilang.',
+  ),
+  _JenisSurat(
+    nama: 'Surat Keterangan Pindah',
+    deskripsi: 'Surat yang menerangkan bahwa warga berpindah tempat tinggal dari satu wilayah ke wilayah lain.',
+  ),
+  _JenisSurat(
+    nama: 'Formulir Pendaftaran Perpindahan Penduduk (F-1.03)',
+    deskripsi: 'Formulir resmi untuk mendaftarkan perpindahan penduduk antar wilayah administrasi.',
+  ),
+  _JenisSurat(
+    nama: 'Surat Keterangan Kelahiran (F-2.01)',
+    deskripsi: 'Surat keterangan resmi yang mencatat peristiwa kelahiran warga di wilayah desa.',
+  ),
+  _JenisSurat(
+    nama: 'Surat Keterangan Kematian (F-2.29)',
+    deskripsi: 'Surat keterangan resmi yang mencatat peristiwa kematian warga di wilayah desa.',
+  ),
+];
+
+// ── LayananScreen ─────────────────────────────────────────────────────────────
+class LayananScreen extends StatefulWidget {
   const LayananScreen({super.key});
 
-  static const List<Map<String, dynamic>> _layanan = [
-    {
-      'no': 1,
-      'title': 'Pilih jenis surat yang dibuat',
-      'desc': 'Tentukan jenis surat administrasi yang Anda butuhkan',
-      'icon': Icons.list_alt_outlined,
-    },
-    {
-      'no': 2,
-      'title': 'Isi form surat yang akan dibuat',
-      'desc': 'Lengkapi data diri dan informasi yang diperlukan',
-      'icon': Icons.edit_note_outlined,
-    },
-    {
-      'no': 3,
-      'title': 'Surat yang diinginkan akan segera diproses',
-      'desc': 'Tunggu konfirmasi dan unduh surat Anda',
-      'icon': Icons.check_circle_outline,
-    },
-  ];
+  @override
+  State<LayananScreen> createState() => _LayananScreenState();
+}
 
-  static const List<Map<String, String>> _suratTypes = [
-    {'name': 'Surat Keterangan Domisili', 'icon': '🏠'},
-    {'name': 'Surat Keterangan Tidak Mampu', 'icon': '📋'},
-    {'name': 'Surat Keterangan Usaha', 'icon': '💼'},
-    {'name': 'Surat Pengantar KTP', 'icon': '🪪'},
-    {'name': 'Surat Keterangan Kelahiran', 'icon': '👶'},
-    {'name': 'Surat Keterangan Kematian', 'icon': '📄'},
-  ];
+class _LayananScreenState extends State<LayananScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  List<_JenisSurat> get _currentList {
+    final list = _tabController.index == 0 ? _layananUmum : _layananKependudukan;
+    if (_searchQuery.isEmpty) return list;
+    return list
+        .where((s) => s.nama.toLowerCase().contains(_searchQuery.toLowerCase()))
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.all(20),
+      child: Column(
         children: [
-          Text(
-            'Layanan',
-            style: GoogleFonts.poppins(
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Cara mudah membuat surat administrasi',
-            style: GoogleFonts.poppins(
-                fontSize: 13, color: AppTheme.textSecondary),
-          ),
-          const SizedBox(height: 24),
-
-          // Steps
-          ...List.generate(
-            _layanan.length,
-            (i) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: _StepCard(
-                number: _layanan[i]['no'],
-                title: _layanan[i]['title'],
-                desc: _layanan[i]['desc'],
-                icon: _layanan[i]['icon'],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Pilih Jenis Surat
-          Text(
-            'Pilih Jenis Surat',
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.4,
-            children: _suratTypes
-                .map((s) => _SuratCard(
-                      name: s['name']!,
-                      icon: s['icon']!,
-                      onTap: () => _showSuratDialog(context, s['name']!),
-                    ))
-                .toList(),
-          ),
-          const SizedBox(height: 12),
-        ],
-      ),
-    );
-  }
-
-  void _showSuratDialog(BuildContext context, String suratName) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => _SuratFormSheet(suratName: suratName),
-    );
-  }
-}
-
-class _StepCard extends StatelessWidget {
-  final int number;
-  final String title;
-  final String desc;
-  final IconData icon;
-
-  const _StepCard({
-    required this.number,
-    required this.title,
-    required this.desc,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
+          // ── Header ──────────────────────────────────────────────────
           Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppTheme.primary,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(
-              child: Text(
-                '$number',
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
+            color: AppTheme.surface,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  desc,
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: AppTheme.textSecondary,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(icon, color: AppTheme.primary.withOpacity(0.5), size: 28),
-        ],
-      ),
-    );
-  }
-}
-
-class _SuratCard extends StatelessWidget {
-  final String name;
-  final String icon;
-  final VoidCallback onTap;
-
-  const _SuratCard({
-    required this.name,
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(icon, style: const TextStyle(fontSize: 28)),
-            const SizedBox(height: 8),
-            Text(
-              name,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.textPrimary,
-                height: 1.3,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SuratFormSheet extends StatefulWidget {
-  final String suratName;
-  const _SuratFormSheet({required this.suratName});
-
-  @override
-  State<_SuratFormSheet> createState() => _SuratFormSheetState();
-}
-
-class _SuratFormSheetState extends State<_SuratFormSheet> {
-  final _keperluan = TextEditingController();
-  bool _submitted = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
-      child: _submitted
-          ? Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.check_circle,
-                    color: AppTheme.primary, size: 64),
                 const SizedBox(height: 16),
                 Text(
-                  'Permohonan Diajukan!',
+                  'Pilih Jenis Surat',
                   style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: AppTheme.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  '${widget.suratName} Anda sedang diproses. Kami akan memberitahu Anda setelah surat siap.',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: AppTheme.textSecondary,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Selesai'),
-                ),
-              ],
-            )
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        widget.suratName,
-                        style: GoogleFonts.poppins(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.textPrimary,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-                const Divider(),
                 const SizedBox(height: 12),
-                Text(
-                  'Keperluan',
-                  style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppTheme.textPrimary),
-                ),
-                const SizedBox(height: 6),
-                TextFormField(
-                  controller: _keperluan,
-                  maxLines: 3,
-                  style: GoogleFonts.poppins(fontSize: 14),
-                  decoration: const InputDecoration(
-                      hintText: 'Jelaskan keperluan surat ini'),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () => setState(() => _submitted = true),
-                  child: const Text('Ajukan Surat'),
+
+                // ── Tab bar ────────────────────────────────────────────
+                TabBar(
+                  controller: _tabController,
+                  labelColor: AppTheme.primary,
+                  unselectedLabelColor: AppTheme.textSecondary,
+                  indicatorColor: AppTheme.primary,
+                  indicatorWeight: 2.5,
+                  labelStyle: GoogleFonts.poppins(
+                      fontSize: 13, fontWeight: FontWeight.w600),
+                  unselectedLabelStyle:
+                      GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w400),
+                  tabs: const [
+                    Tab(text: 'Layanan Umum'),
+                    Tab(text: 'Layanan Kependudukan'),
+                  ],
                 ),
               ],
             ),
+          ),
+
+          // ── Search bar ───────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: TextField(
+              onChanged: (v) => setState(() => _searchQuery = v),
+              style: GoogleFonts.poppins(fontSize: 13),
+              decoration: InputDecoration(
+                hintText: 'Cari Surat...',
+                prefixIcon: const Icon(Icons.search,
+                    size: 18, color: AppTheme.textSecondary),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                isDense: true,
+              ),
+            ),
+          ),
+
+          // ── Grid surat ───────────────────────────────────────────────
+          Expanded(
+            child: _currentList.isEmpty
+                ? Center(
+                    child: Text('Tidak ada surat ditemukan',
+                        style: GoogleFonts.poppins(
+                            color: AppTheme.textSecondary, fontSize: 14)),
+                  )
+                : GridView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 0.78,
+                    ),
+                    itemCount: _currentList.length,
+                    itemBuilder: (_, i) => _SuratCard(
+                      surat: _currentList[i],
+                      onTap: () => _navigateToForm(context, _currentList[i].nama),
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToForm(BuildContext context, String namaSurat) {
+    Widget? screen;
+    switch (namaSurat) {
+      case 'Surat Keterangan Usaha':
+        screen = const SuratKeteranganUsahaScreen();
+        break;
+      case 'Surat Keterangan Tempat Usaha':
+        screen = const SuratKeteranganTempatUsahaScreen();
+        break;
+      case 'Surat Keterangan Pengantar Barang':
+        screen = const SuratPengantarBarangScreen();
+        break;
+      case 'Surat Keterangan Tidak Mampu (Sekolah)':
+        screen = const SuratKeteranganTidakMampuScreen();
+        break;
+      case 'Permohonan Izin Keramaian / Pesta':
+        screen = const PermohonanIzinKeramaianScreen();
+        break;
+      case 'Surat Pengantar SKCK':
+        screen = const SuratPengantarSkckScreen();
+        break;
+      case 'Surat Keterangan Ahli Waris':
+        screen = const SuratKeteranganAhliWarisScreen();
+        break;
+      case 'Surat Keterangan Lainnya':
+        screen = const SuratKeteranganLainnyaScreen();
+        break;
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Form "$namaSurat" belum tersedia',
+              style: GoogleFonts.poppins()),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppTheme.textSecondary,
+        ));
+        return;
+    }
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen!));
+  }
+
+}
+class _SuratCard extends StatelessWidget {
+  final _JenisSurat surat;
+  final VoidCallback onTap;
+
+  const _SuratCard({required this.surat, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.border),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Icon area
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryLight,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.description_outlined,
+                      color: AppTheme.primary, size: 22),
+                ),
+              ],
+            ),
+          ),
+
+          const Divider(height: 1, indent: 14, endIndent: 14),
+
+          // Nama surat
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 8, 14, 4),
+            child: Text(
+              surat.nama,
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.textPrimary,
+                height: 1.3,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+
+          // Deskripsi — Flexible agar tidak overflow
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+              child: Text(
+                surat.deskripsi,
+                style: GoogleFonts.poppins(
+                  fontSize: 10,
+                  color: AppTheme.textSecondary,
+                  height: 1.4,
+                ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+
+          // Tombol Pilih Surat
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onTap,
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 36),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  textStyle: GoogleFonts.poppins(
+                      fontSize: 12, fontWeight: FontWeight.w600),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text('PILIH SURAT'),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
+

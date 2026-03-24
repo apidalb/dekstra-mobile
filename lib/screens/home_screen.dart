@@ -3,77 +3,113 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import 'layanan_screen.dart';
 import 'akun_screen.dart';
+import 'riwayat_screen.dart';
 
-// ── Model ─────────────────────────────────────────────────────────────────────
-class _Permohonan {
-  final String nik;
-  final String nama;
+// ══════════════════════════════════════════════════════════════════════════════
+// Model & Data (public — diakses juga oleh RiwayatScreen)
+// ══════════════════════════════════════════════════════════════════════════════
+
+class Permohonan {
   final String jenisSurat;
-  final String tanggal;
+  final DateTime tanggal;
   final String status;
-  const _Permohonan({
-    required this.nik, required this.nama,
-    required this.jenisSurat, required this.tanggal, required this.status,
+
+  const Permohonan({
+    required this.jenisSurat,
+    required this.tanggal,
+    required this.status,
   });
+
+  String get tanggalFormatted =>
+      '${tanggal.year}-${tanggal.month.toString().padLeft(2, '0')}-${tanggal.day.toString().padLeft(2, '0')}';
 }
 
+// Data dummy — sesuai tampilan web
+final List<Permohonan> daftarPermohonan = [
+  Permohonan(jenisSurat: 'Surat Domisili',                          tanggal: DateTime(2026, 1, 1),  status: 'Verifikasi RT'),
+  Permohonan(jenisSurat: 'Surat Usaha',                             tanggal: DateTime(2026, 1, 4),  status: 'Verifikasi RW'),
+  Permohonan(jenisSurat: 'Surat Nikah',                             tanggal: DateTime(2026, 1, 9),  status: 'Verifikasi Admin'),
+  Permohonan(jenisSurat: 'Surat Pengantar Barang',                  tanggal: DateTime(2026, 1, 9),  status: 'Verifikasi Admin'),
+  Permohonan(jenisSurat: 'Surat Keterangan Tidak Mampu (Sekolah)',  tanggal: DateTime(2026, 1, 9),  status: 'Verifikasi Admin'),
+  Permohonan(jenisSurat: 'Surat Pengantar Barang',                  tanggal: DateTime(2026, 1, 9),  status: 'Verifikasi Admin'),
+  Permohonan(jenisSurat: 'Permohonan Izin Keramaian / Pesta',       tanggal: DateTime(2026, 1, 15), status: 'Disetujui'),
+  Permohonan(jenisSurat: 'Formulir Kartu Keluarga (F-1.01)',        tanggal: DateTime(2026, 1, 15), status: 'Disetujui'),
+  Permohonan(jenisSurat: 'Surat Domisili',                          tanggal: DateTime(2026, 1, 18), status: 'Ditolak'),
+];
+
+// Daftar jenis surat unik untuk dropdown filter
+List<String> get jenisSuratList {
+  final seen = <String>{};
+  return daftarPermohonan
+      .map((p) => p.jenisSurat)
+      .where((j) => seen.add(j))
+      .toList()
+    ..sort();
+}
+
+const List<String> allStatuses = [
+  'Verifikasi RT',
+  'Verifikasi RW',
+  'Verifikasi Admin',
+  'Disetujui',
+  'Ditolak',
+];
+
+// ── Status helpers ─────────────────────────────────────────────────────────────
+Color statusBg(String s) {
+  switch (s) {
+    case 'Verifikasi RT':    return const Color(0xFFFEF3C7);
+    case 'Verifikasi RW':    return const Color(0xFFDBEAFE);
+    case 'Verifikasi Admin': return const Color(0xFFEDE9FE);
+    case 'Disetujui':        return const Color(0xFFD1FAE5);
+    case 'Ditolak':          return const Color(0xFFFFE4E6);
+    default:                 return AppTheme.primaryLight;
+  }
+}
+
+Color statusColor(String s) {
+  switch (s) {
+    case 'Verifikasi RT':    return const Color(0xFFD97706);
+    case 'Verifikasi RW':    return const Color(0xFF2563EB);
+    case 'Verifikasi Admin': return const Color(0xFF7C3AED);
+    case 'Disetujui':        return const Color(0xFF059669);
+    case 'Ditolak':          return const Color(0xFFE11D48);
+    default:                 return AppTheme.primary;
+  }
+}
+
+// ── Notifikasi ─────────────────────────────────────────────────────────────────
 class _Notifikasi {
   final String judul;
   final String pesan;
   final String waktu;
   final bool dibaca;
   const _Notifikasi({
-    required this.judul, required this.pesan,
-    required this.waktu, this.dibaca = false,
+    required this.judul,
+    required this.pesan,
+    required this.waktu,
+    this.dibaca = false,
   });
 }
 
-// ── Data dummy ────────────────────────────────────────────────────────────────
-const List<_Permohonan> _daftarPermohonan = [
-  _Permohonan(nik: '1111111111111111', nama: 'John Doe', jenisSurat: 'Surat Domisili',                                       tanggal: '12 Januari 2026',  status: 'Verifikasi RT'),
-  _Permohonan(nik: '1111111111111111', nama: 'John Doe', jenisSurat: 'Surat Keterangan Usaha',                               tanggal: '10 Februari 2026', status: 'Verifikasi RT'),
-  _Permohonan(nik: '1111111111111111', nama: 'John Doe', jenisSurat: 'Surat Keterangan Penghasilan Orang Tua',               tanggal: '10 Januari 2026',  status: 'Disetujui'),
-  _Permohonan(nik: '1111111111111111', nama: 'John Doe', jenisSurat: 'Surat Pengantar SKCK',                                 tanggal: '10 Desember 2025', status: 'Ditolak'),
-  _Permohonan(nik: '1111111111111111', nama: 'John Doe', jenisSurat: 'Surat Pernyataan Tidak Memiliki Dokumen Kependudukan', tanggal: '12 Februari 2026', status: 'Verifikasi RW'),
-  _Permohonan(nik: '1111111111111111', nama: 'John Doe', jenisSurat: 'Surat Keterangan Tidak Mampu',                        tanggal: '1 Februari 2026',  status: 'Verifikasi RW'),
-  _Permohonan(nik: '1111111111111111', nama: 'John Doe', jenisSurat: 'Surat Pengantar Pindah (F-1.33)',                     tanggal: '8 Februari 2026',  status: 'Disetujui'),
-  _Permohonan(nik: '1111111111111111', nama: 'John Doe', jenisSurat: 'Formulir Pendaftaran KK Baru WNI (F-1.15)',           tanggal: '10 Februari 2026', status: 'Disetujui'),
-  _Permohonan(nik: '1111111111111111', nama: 'John Doe', jenisSurat: 'Pengantar Nikah',                                     tanggal: '7 Februari 2026',  status: 'Ditolak'),
-  _Permohonan(nik: '1111111111111111', nama: 'John Doe', jenisSurat: 'Surat Keterangan Pengantar Barang',                   tanggal: '12 Januari 2026',  status: 'Ditolak'),
-];
-
 const List<_Notifikasi> _daftarNotifikasi = [
-  _Notifikasi(judul: 'Pengajuan Surat Berhasil',      pesan: 'Pengajuan Surat Keterangan Usaha Anda berhasil terkirim',                          waktu: '2 menit lalu'),
-  _Notifikasi(judul: 'Pengajuan Surat Diteruskan',    pesan: 'Pengajuan Surat Anda telah diverifikasi oleh RT dan diteruskan ke RW',             waktu: '10 menit lalu'),
-  _Notifikasi(judul: 'Pengajuan Surat Diperbarui',    pesan: 'Pengajuan Surat Anda telah diverifikasi oleh RW dan diteruskan ke Kepala Desa',    waktu: '1 jam lalu',   dibaca: true),
-  _Notifikasi(judul: 'Pengajuan Surat Telah Selesai', pesan: 'Surat Anda telah selesai diproses dan siap diunduh',                              waktu: '2 jam lalu',   dibaca: true),
+  _Notifikasi(judul: 'Pengajuan Surat Berhasil',  pesan: 'Pengajuan Surat Keterangan Usaha berhasil dikirim',  waktu: '2 menit lalu'),
+  _Notifikasi(judul: 'Surat Diverifikasi RT',     pesan: 'Pengajuan diteruskan ke RW',                        waktu: '10 menit lalu'),
+  _Notifikasi(judul: 'Surat Diverifikasi RW',     pesan: 'Pengajuan diteruskan ke Kepala Desa',               waktu: '1 jam lalu',  dibaca: true),
 ];
 
-// ── Status helpers ────────────────────────────────────────────────────────────
-Color _statusBg(String s) {
-  switch (s) {
-    case 'Verifikasi RT': return const Color(0xFFFEF3C7);
-    case 'Verifikasi RW': return const Color(0xFFDBEAFE);
-    case 'Disetujui':     return const Color(0xFFD1FAE5);
-    case 'Ditolak':       return const Color(0xFFFFE4E6);
-    default:              return AppTheme.primaryLight;
-  }
-}
-
-Color _statusColor(String s) {
-  switch (s) {
-    case 'Verifikasi RT': return const Color(0xFFD97706);
-    case 'Verifikasi RW': return const Color(0xFF2563EB);
-    case 'Disetujui':     return const Color(0xFF059669);
-    case 'Ditolak':       return const Color(0xFFE11D48);
-    default:              return AppTheme.primary;
-  }
-}
-
-// ── HomeScreen ────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+// HomeScreen
+// ══════════════════════════════════════════════════════════════════════════════
 class HomeScreen extends StatefulWidget {
   final String userName;
-  const HomeScreen({super.key, required this.userName});
+  final String userEmail;
+
+  const HomeScreen({
+    super.key,
+    required this.userName,
+    required this.userEmail,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -89,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _screens = [
       _BerandaTab(userName: widget.userName),
       const LayananScreen(),
-      AkunScreen(userName: widget.userName),
+      AkunScreen(userName: widget.userName, userEmail: widget.userEmail),
     ];
   }
 
@@ -100,9 +136,13 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppTheme.surface,
-          boxShadow: [BoxShadow(
+          boxShadow: [
+            BoxShadow(
               color: Colors.black.withOpacity(0.08),
-              blurRadius: 12, offset: const Offset(0, -4))],
+              blurRadius: 12,
+              offset: const Offset(0, -4),
+            ),
+          ],
         ),
         child: BottomNavigationBar(
           currentIndex: _selectedIndex,
@@ -111,12 +151,25 @@ class _HomeScreenState extends State<HomeScreen> {
           unselectedItemColor: AppTheme.textSecondary,
           backgroundColor: Colors.transparent,
           elevation: 0,
-          selectedLabelStyle: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500),
+          selectedLabelStyle:
+              GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500),
           unselectedLabelStyle: GoogleFonts.poppins(fontSize: 12),
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Beranda'),
-            BottomNavigationBarItem(icon: Icon(Icons.description_outlined), activeIcon: Icon(Icons.description), label: 'Layanan'),
-            BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Akun'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home),
+              label: 'Beranda',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.description_outlined),
+              activeIcon: Icon(Icons.description),
+              label: 'Layanan',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              activeIcon: Icon(Icons.person),
+              label: 'Akun',
+            ),
           ],
         ),
       ),
@@ -124,7 +177,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ── Beranda Tab ───────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+// _BerandaTab
+// ══════════════════════════════════════════════════════════════════════════════
 class _BerandaTab extends StatefulWidget {
   final String userName;
   const _BerandaTab({required this.userName});
@@ -134,17 +189,56 @@ class _BerandaTab extends StatefulWidget {
 }
 
 class _BerandaTabState extends State<_BerandaTab> {
+  // ── Notif overlay ──────────────────────────────────────────────────────────
   final GlobalKey _notifKey = GlobalKey();
   OverlayEntry? _overlayEntry;
   bool _notifOpen = false;
-  String _searchQuery = '';
 
-  List<_Permohonan> get _filtered => _searchQuery.isEmpty
-      ? _daftarPermohonan
-      : _daftarPermohonan.where((p) =>
-          p.jenisSurat.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          p.status.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+  // ── Filter & Search state ──────────────────────────────────────────────────
+  String _searchQuery   = '';
+  String? _filterStatus;       // null = semua
+  String? _filterJenis;        // null = semua
+  DateTime? _filterTanggalDari;
+  DateTime? _filterTanggalHingga;
 
+  // ── List permohonan yang bisa dimutasi (hapus) ─────────────────────────────
+  late List<Permohonan> _list;
+
+  @override
+  void initState() {
+    super.initState();
+    _list = List.from(daftarPermohonan);
+  }
+
+  bool get _hasActiveFilter =>
+      _filterStatus != null ||
+      _filterJenis != null ||
+      _filterTanggalDari != null ||
+      _filterTanggalHingga != null;
+
+  List<Permohonan> get _filtered {
+    return _list.where((p) {
+      if (_searchQuery.isNotEmpty &&
+          !p.jenisSurat.toLowerCase().contains(_searchQuery.toLowerCase()) &&
+          !p.status.toLowerCase().contains(_searchQuery.toLowerCase())) {
+        return false;
+      }
+      if (_filterStatus != null && p.status != _filterStatus) return false;
+      if (_filterJenis != null && p.jenisSurat != _filterJenis) return false;
+      if (_filterTanggalDari != null &&
+          p.tanggal.isBefore(_filterTanggalDari!)) {
+        return false;
+      }
+      if (_filterTanggalHingga != null &&
+          p.tanggal.isAfter(
+              _filterTanggalHingga!.add(const Duration(days: 1)))) {
+        return false;
+      }
+      return true;
+    }).toList();
+  }
+
+  // ── Notif overlay ──────────────────────────────────────────────────────────
   void _toggleNotif() => _notifOpen ? _closeNotif() : _openNotif();
 
   void _openNotif() {
@@ -157,7 +251,9 @@ class _BerandaTabState extends State<_BerandaTab> {
         children: [
           Positioned.fill(
             child: GestureDetector(
-                onTap: _closeNotif, behavior: HitTestBehavior.translucent),
+              onTap: _closeNotif,
+              behavior: HitTestBehavior.translucent,
+            ),
           ),
           Positioned(
             top: offset.dy + size.height + 8,
@@ -182,54 +278,372 @@ class _BerandaTabState extends State<_BerandaTab> {
     if (mounted) setState(() => _notifOpen = false);
   }
 
+  // ── Filter dialog popup ────────────────────────────────────────────────────
+  void _showFilter() {
+    String? tmpStatus   = _filterStatus;
+    String? tmpJenis    = _filterJenis;
+    DateTime? tmpDari   = _filterTanggalDari;
+    DateTime? tmpHingga = _filterTanggalHingga;
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.35),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModal) {
+          Future<void> pickDate({required bool isDari}) async {
+            final picked = await showDatePicker(
+              context: ctx,
+              initialDate:
+                  (isDari ? tmpDari : tmpHingga) ?? DateTime(2026, 1, 1),
+              firstDate: DateTime(2024),
+              lastDate: DateTime(2030),
+              builder: (c, child) => Theme(
+                data: Theme.of(c).copyWith(
+                  colorScheme:
+                      const ColorScheme.light(primary: AppTheme.primary),
+                ),
+                child: child!,
+              ),
+            );
+            if (picked != null) {
+              setModal(() {
+                if (isDari) {
+                  tmpDari = picked;
+                } else {
+                  tmpHingga = picked;
+                }
+              });
+            }
+          }
+
+          String fmtDate(DateTime? d) => d == null
+              ? 'Pilih Tanggal'
+              : '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+
+          return Dialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16)),
+            backgroundColor: AppTheme.surface,
+            insetPadding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    children: [
+                      Text('Filter Data',
+                          style: GoogleFonts.poppins(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textPrimary)),
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(ctx),
+                        child: const Icon(Icons.close,
+                            size: 20, color: AppTheme.textSecondary),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Status
+                  Text('Berdasarkan Status Surat',
+                      style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppTheme.textPrimary)),
+                  const SizedBox(height: 8),
+                  _filterDropdown(
+                    value: tmpStatus,
+                    hint: 'Semua',
+                    items: allStatuses,
+                    onChanged: (v) => setModal(() => tmpStatus = v),
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(color: AppTheme.border),
+                  const SizedBox(height: 16),
+
+                  // Jenis Surat
+                  Text('Berdasarkan Jenis Surat',
+                      style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppTheme.textPrimary)),
+                  const SizedBox(height: 8),
+                  _filterDropdown(
+                    value: tmpJenis,
+                    hint: 'Semua',
+                    items: jenisSuratList,
+                    onChanged: (v) => setModal(() => tmpJenis = v),
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(color: AppTheme.border),
+                  const SizedBox(height: 16),
+
+                  // Tanggal
+                  Text('Berdasarkan Tanggal Pengajuan',
+                      style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppTheme.textPrimary)),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _datePickerButton(
+                          label: fmtDate(tmpDari),
+                          onTap: () => pickDate(isDari: true),
+                          hasValue: tmpDari != null,
+                        ),
+                      ),
+                      Padding(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 8),
+                        child: Text('–',
+                            style: GoogleFonts.poppins(
+                                color: AppTheme.textSecondary,
+                                fontSize: 16)),
+                      ),
+                      Expanded(
+                        child: _datePickerButton(
+                          label: fmtDate(tmpHingga),
+                          onTap: () => pickDate(isDari: false),
+                          hasValue: tmpHingga != null,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Action buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => setModal(() {
+                            tmpStatus  = null;
+                            tmpJenis   = null;
+                            tmpDari    = null;
+                            tmpHingga  = null;
+                          }),
+                          icon: const Icon(Icons.refresh, size: 16),
+                          label: const Text('Reset Filter'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _filterStatus        = tmpStatus;
+                              _filterJenis         = tmpJenis;
+                              _filterTanggalDari   = tmpDari;
+                              _filterTanggalHingga = tmpHingga;
+                            });
+                            Navigator.pop(ctx);
+                          },
+                          icon: const Icon(Icons.check, size: 16),
+                          label: const Text('Apply Filter'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _filterDropdown({
+    required String? value,
+    required String hint,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: AppTheme.background,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppTheme.border),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          hint: Text('Semua',
+              style: GoogleFonts.poppins(
+                  fontSize: 13, color: AppTheme.textSecondary)),
+          style: GoogleFonts.poppins(fontSize: 13, color: AppTheme.textPrimary),
+          icon: const Icon(Icons.keyboard_arrow_down,
+              color: AppTheme.textSecondary),
+          items: [
+            DropdownMenuItem<String>(
+              value: null,
+              child: Text('Semua',
+                  style: GoogleFonts.poppins(
+                      fontSize: 13, color: AppTheme.textSecondary)),
+            ),
+            ...items.map((e) => DropdownMenuItem(
+                  value: e,
+                  child: Text(e,
+                      style: GoogleFonts.poppins(
+                          fontSize: 13, color: AppTheme.textPrimary)),
+                )),
+          ],
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+  Widget _datePickerButton({
+    required String label,
+    required VoidCallback onTap,
+    required bool hasValue,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppTheme.background,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: hasValue ? AppTheme.primary : AppTheme.border,
+            width: hasValue ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.calendar_today,
+                size: 14,
+                color: hasValue ? AppTheme.primary : AppTheme.textSecondary),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: hasValue ? AppTheme.textPrimary : AppTheme.textSecondary,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Hapus item ─────────────────────────────────────────────────────────────
+  void _hapusPermohonan(Permohonan item) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.4),
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Hapus Permohonan?',
+            style: GoogleFonts.poppins(
+                fontSize: 16, fontWeight: FontWeight.w700)),
+        content: Text(
+          'Permohonan "${item.jenisSurat}" akan dihapus permanen.',
+          style: GoogleFonts.poppins(fontSize: 13, color: AppTheme.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Batal',
+                style: GoogleFonts.poppins(color: AppTheme.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() => _list.remove(item));
+            },
+            child: Text('Hapus',
+                style: GoogleFonts.poppins(
+                    color: Colors.red, fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
-  void dispose() { _closeNotif(); super.dispose(); }
+  void dispose() {
+    _closeNotif();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final unread = _daftarNotifikasi.where((n) => !n.dibaca).length;
+    final unread  = _daftarNotifikasi.where((n) => !n.dibaca).length;
+    final filtered = _filtered;
 
     return SafeArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          // ── Header ────────────────────────────────────────────────
+          // ── Header ──────────────────────────────────────────────────
           Container(
             color: AppTheme.surface,
             padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
             child: Row(
               children: [
-                // Avatar
                 Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: Colors.pink.shade100,
+                  width: 46, height: 46,
+                  decoration: const BoxDecoration(
+                    color: AppTheme.primaryLight,
                     shape: BoxShape.circle,
                   ),
-                  child: const Center(
-                    child: Text('👩', style: TextStyle(fontSize: 24)),
+                  child: Center(
+                    child: Text(
+                      widget.userName.isNotEmpty
+                          ? widget.userName[0].toUpperCase()
+                          : 'U',
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.primary,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
-                // Greeting
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Selamat Datang!',
-                        style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.textPrimary,
-                        ),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              'Selamat Datang, ${widget.userName}!',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.textPrimary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Text('👋', style: TextStyle(fontSize: 14)),
+                        ],
                       ),
                       Text(
-                        '${widget.userName},',
+                        'Silakan buat pengajuan surat Anda',
                         style: GoogleFonts.poppins(
-                          fontSize: 13,
+                          fontSize: 11,
                           color: AppTheme.textSecondary,
                         ),
                       ),
@@ -243,8 +657,7 @@ class _BerandaTabState extends State<_BerandaTab> {
                   child: Stack(
                     children: [
                       Container(
-                        width: 40,
-                        height: 40,
+                        width: 40, height: 40,
                         decoration: BoxDecoration(
                           color: _notifOpen
                               ? AppTheme.primaryLight
@@ -284,37 +697,160 @@ class _BerandaTabState extends State<_BerandaTab> {
 
           const Divider(height: 1, color: AppTheme.border),
 
-          // ── Search bar ───────────────────────────────────────────
+          // ── Tombol aksi ──────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: TextField(
-              onChanged: (v) => setState(() => _searchQuery = v),
-              style: GoogleFonts.poppins(fontSize: 13),
-              decoration: InputDecoration(
-                hintText: 'Cari data...',
-                prefixIcon: const Icon(Icons.search,
-                    size: 18, color: AppTheme.textSecondary),
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                isDense: true,
-              ),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      final homeState = context
+                          .findAncestorStateOfType<_HomeScreenState>();
+                      homeState?.setState(() => homeState._selectedIndex = 1);
+                    },
+                    icon: const Icon(Icons.add, size: 16),
+                    label: const Text(
+                      'Buat Surat',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(0, 42),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      textStyle: GoogleFonts.poppins(
+                          fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const RiwayatScreen()),
+                    ),
+                    icon: const Icon(Icons.history, size: 16),
+                    label: const Text(
+                      'Riwayat',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF59E0B),
+                      minimumSize: const Size(0, 42),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      textStyle: GoogleFonts.poppins(
+                          fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
-          // ── Daftar permohonan ────────────────────────────────────
+          // ── Search + Filter ──────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    onChanged: (v) => setState(() => _searchQuery = v),
+                    style: GoogleFonts.poppins(fontSize: 13),
+                    decoration: const InputDecoration(
+                      hintText: 'Cari data...',
+                      prefixIcon: Icon(Icons.search,
+                          size: 18, color: AppTheme.textSecondary),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 12),
+                      isDense: true,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Tombol Filter dengan indikator aktif
+                GestureDetector(
+                  onTap: _showFilter,
+                  child: Container(
+                    height: 42,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: _hasActiveFilter
+                          ? AppTheme.primary
+                          : AppTheme.surface,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: _hasActiveFilter
+                            ? AppTheme.primary
+                            : AppTheme.border,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.filter_list,
+                          size: 16,
+                          color: _hasActiveFilter
+                              ? Colors.white
+                              : AppTheme.textSecondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Filter',
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: _hasActiveFilter
+                                ? Colors.white
+                                : AppTheme.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Info jumlah data ─────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+            child: Text(
+              filtered.isEmpty
+                  ? 'Tidak ada data'
+                  : 'Menampilkan ${filtered.length} dari ${_list.length} data',
+              style: GoogleFonts.poppins(
+                  fontSize: 11, color: AppTheme.textSecondary),
+            ),
+          ),
+
+          // ── Daftar permohonan ────────────────────────────────────────
           Expanded(
-            child: _filtered.isEmpty
+            child: filtered.isEmpty
                 ? Center(
-                    child: Text('Tidak ada data',
-                        style: GoogleFonts.poppins(
-                            color: AppTheme.textSecondary)))
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.inbox_outlined,
+                            size: 48, color: AppTheme.border),
+                        const SizedBox(height: 12),
+                        Text('Tidak ada data',
+                            style: GoogleFonts.poppins(
+                                color: AppTheme.textSecondary, fontSize: 14)),
+                      ],
+                    ),
+                  )
                 : ListView.separated(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                    itemCount: _filtered.length,
+                    itemCount: filtered.length,
                     separatorBuilder: (_, __) =>
                         const Divider(height: 1, color: AppTheme.border),
-                    itemBuilder: (context, i) =>
-                        _PermohonanCard(item: _filtered[i]),
+                    itemBuilder: (context, i) => PermohonanCard(
+                      item: filtered[i],
+                    ),
                   ),
           ),
         ],
@@ -323,11 +859,13 @@ class _BerandaTabState extends State<_BerandaTab> {
   }
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// PermohonanCard (public — dipakai juga di RiwayatScreen)
+// ══════════════════════════════════════════════════════════════════════════════
+class PermohonanCard extends StatelessWidget {
+  final Permohonan item;
 
-// ── Kartu permohonan ──────────────────────────────────────────────────────────
-class _PermohonanCard extends StatelessWidget {
-  final _Permohonan item;
-  const _PermohonanCard({required this.item});
+  const PermohonanCard({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
@@ -336,10 +874,8 @@ class _PermohonanCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Ikon dokumen
           Container(
-            width: 40,
-            height: 40,
+            width: 40, height: 40,
             decoration: BoxDecoration(
               color: AppTheme.primaryLight,
               borderRadius: BorderRadius.circular(10),
@@ -349,7 +885,6 @@ class _PermohonanCard extends StatelessWidget {
           ),
           const SizedBox(width: 12),
 
-          // Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -357,23 +892,23 @@ class _PermohonanCard extends StatelessWidget {
                 Text(
                   item.jenisSurat,
                   style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  item.tanggal,
+                  item.tanggalFormatted,
                   style: GoogleFonts.poppins(
                       fontSize: 11, color: AppTheme.textSecondary),
                 ),
                 const SizedBox(height: 6),
-                // Badge status
                 Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 3),
                   decoration: BoxDecoration(
-                    color: _statusBg(item.status),
+                    color: statusBg(item.status),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -381,7 +916,7 @@ class _PermohonanCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: _statusColor(item.status),
+                      color: statusColor(item.status),
                     ),
                   ),
                 ),
@@ -389,7 +924,7 @@ class _PermohonanCard extends StatelessWidget {
             ),
           ),
 
-          // Tombol aksi ⋮ dropdown
+          // Menu aksi — hanya Lihat Detail
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert,
                 size: 20, color: AppTheme.textSecondary),
@@ -398,49 +933,18 @@ class _PermohonanCard extends StatelessWidget {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10)),
             padding: EdgeInsets.zero,
-            onSelected: (_) {},
             itemBuilder: (_) => [
               PopupMenuItem(
                 value: 'detail',
                 height: 40,
-                child: Row(
-                  children: [
-                    const Icon(Icons.visibility_outlined,
-                        size: 16, color: AppTheme.textPrimary),
-                    const SizedBox(width: 10),
-                    Text('Lihat Detail',
-                        style: GoogleFonts.poppins(
-                            fontSize: 13, color: AppTheme.textPrimary)),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'unduh',
-                height: 40,
-                child: Row(
-                  children: [
-                    const Icon(Icons.download_outlined,
-                        size: 16, color: AppTheme.textPrimary),
-                    const SizedBox(width: 10),
-                    Text('Unduh Surat',
-                        style: GoogleFonts.poppins(
-                            fontSize: 13, color: AppTheme.textPrimary)),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'hapus',
-                height: 40,
-                child: Row(
-                  children: [
-                    const Icon(Icons.delete_outline,
-                        size: 16, color: Colors.red),
-                    const SizedBox(width: 10),
-                    Text('Hapus',
-                        style: GoogleFonts.poppins(
-                            fontSize: 13, color: Colors.red)),
-                  ],
-                ),
+                child: Row(children: [
+                  const Icon(Icons.visibility_outlined,
+                      size: 16, color: AppTheme.textPrimary),
+                  const SizedBox(width: 10),
+                  Text('Lihat Detail',
+                      style: GoogleFonts.poppins(
+                          fontSize: 13, color: AppTheme.textPrimary)),
+                ]),
               ),
             ],
           ),
@@ -448,10 +952,11 @@ class _PermohonanCard extends StatelessWidget {
       ),
     );
   }
-
 }
 
-// ── Panel Notifikasi ──────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+// Panel Notifikasi
+// ══════════════════════════════════════════════════════════════════════════════
 class _NotifPanel extends StatelessWidget {
   final VoidCallback onClose;
   const _NotifPanel({required this.onClose});
@@ -468,7 +973,6 @@ class _NotifPanel extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Header
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 12, 10),
             child: Row(
@@ -490,7 +994,6 @@ class _NotifPanel extends StatelessWidget {
             ),
           ),
           const Divider(height: 1, color: AppTheme.border),
-          // List
           Flexible(
             child: ListView.separated(
               shrinkWrap: true,
@@ -498,11 +1001,9 @@ class _NotifPanel extends StatelessWidget {
               itemCount: _daftarNotifikasi.length,
               separatorBuilder: (_, __) =>
                   const Divider(height: 1, color: AppTheme.border),
-              itemBuilder: (_, i) =>
-                  _NotifItem(notif: _daftarNotifikasi[i]),
+              itemBuilder: (_, i) => _NotifItem(notif: _daftarNotifikasi[i]),
             ),
           ),
-          // Lihat Semua
           const Divider(height: 1, color: AppTheme.border),
           InkWell(
             onTap: onClose,
@@ -530,13 +1031,9 @@ class _NotifItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Belum dibaca: background hijau muda, ikon hijau terang
-    // Sudah dibaca: background putih, ikon abu redup
-    final bgColor    = notif.dibaca ? Colors.transparent : const Color(0xFFECF7F5);
-    final iconBg     = notif.dibaca ? const Color(0xFFEEEEEE) : AppTheme.primaryLight;
-    final iconColor  = notif.dibaca ? AppTheme.textSecondary : AppTheme.primary;
-    final titleColor = AppTheme.textPrimary;
-    final textColor  = AppTheme.textSecondary;
+    final bgColor   = notif.dibaca ? Colors.transparent : const Color(0xFFECF7F5);
+    final iconBg    = notif.dibaca ? const Color(0xFFEEEEEE) : AppTheme.primaryLight;
+    final iconColor = notif.dibaca ? AppTheme.textSecondary : AppTheme.primary;
 
     return Container(
       color: bgColor,
@@ -544,7 +1041,6 @@ class _NotifItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Ikon amplop bulat
           Container(
             width: 44, height: 44,
             decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
@@ -555,25 +1051,21 @@ class _NotifItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  notif.judul,
-                  style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: titleColor),
-                ),
+                Text(notif.judul,
+                    style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary)),
                 const SizedBox(height: 3),
-                Text(
-                  notif.pesan,
-                  style: GoogleFonts.poppins(
-                      fontSize: 12, color: textColor, height: 1.4),
-                ),
+                Text(notif.pesan,
+                    style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: AppTheme.textSecondary,
+                        height: 1.4)),
                 const SizedBox(height: 5),
-                Text(
-                  notif.waktu,
-                  style: GoogleFonts.poppins(
-                      fontSize: 11, color: textColor),
-                ),
+                Text(notif.waktu,
+                    style: GoogleFonts.poppins(
+                        fontSize: 11, color: AppTheme.textSecondary)),
               ],
             ),
           ),

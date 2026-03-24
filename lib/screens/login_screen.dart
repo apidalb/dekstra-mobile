@@ -4,6 +4,39 @@ import '../theme/app_theme.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
 
+// ── Dummy credentials ─────────────────────────────────────────────────────────
+// Simulasi database akun terdaftar untuk keperluan prototype.
+// Ganti dengan integrasi API saat memasuki fase production.
+class _DummyAccount {
+  final String identifier; // NIK atau email
+  final String password;
+  final String nama;
+  final String email;
+
+  const _DummyAccount({
+    required this.identifier,
+    required this.password,
+    required this.nama,
+    required this.email,
+  });
+}
+
+const List<_DummyAccount> _dummyAccounts = [
+  _DummyAccount(
+    identifier: 'user@desktra.com',
+    password: 'Password1',
+    nama: 'John Doe',
+    email: 'user@desktra.com',
+  ),
+  _DummyAccount(
+    identifier: '3201234567890001', // NIK 16 digit
+    password: 'Password1',
+    nama: 'John Doe',
+    email: 'user@desktra.com',
+  ),
+];
+
+// ── LoginScreen ───────────────────────────────────────────────────────────────
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -12,11 +45,14 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
+  final _formKey             = GlobalKey<FormState>();
   final _identifierController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _passwordController  = TextEditingController();
   bool _obscurePassword = true;
-  bool _isLoading = false;
+  bool _isLoading       = false;
+
+  // Pesan error kredensial — ditampilkan sebagai banner di atas form
+  String? _loginError;
 
   @override
   void dispose() {
@@ -25,20 +61,78 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _masuk() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-      await Future.delayed(const Duration(seconds: 1));
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const HomeScreen(userName: 'Display Name'),
-        ),
-        (route) => false,
-      );
+  // ── Validasi identifier: NIK (16 digit) atau email ────────────────────────
+  String? _validateIdentifier(String? v) {
+    if (v == null || v.isEmpty) {
+      return 'NIK / Email tidak boleh kosong';
     }
+    final trimmed = v.trim();
+    final isEmail = trimmed.contains('@');
+
+    if (isEmail) {
+      // Validasi format email
+      if (!RegExp(r'^[\w\.\+\-]+@[\w\-]+\.[a-zA-Z]{2,}$').hasMatch(trimmed)) {
+        return 'Format email tidak valid';
+      }
+    } else {
+      // Validasi NIK: hanya digit, tepat 16 karakter
+      final digits = trimmed.replaceAll(RegExp(r'\D'), '');
+      if (digits.length != 16) {
+        return 'NIK harus 16 digit';
+      }
+    }
+    return null;
+  }
+
+  // ── Validasi password dengan minimum length ───────────────────────────────
+  String? _validatePassword(String? v) {
+    if (v == null || v.isEmpty) return 'Kata sandi tidak boleh kosong';
+    if (v.length < 8) return 'Kata sandi minimal 8 karakter';
+    return null;
+  }
+
+  // ── Proses login dengan dummy credential check ────────────────────────────
+  void _masuk() async {
+    setState(() => _loginError = null);
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+    await Future.delayed(const Duration(seconds: 1));
+    if (!mounted) return;
+
+    final identifier = _identifierController.text.trim();
+    final password   = _passwordController.text;
+
+    _DummyAccount? matched;
+    try {
+      matched = _dummyAccounts.firstWhere(
+        (acc) => acc.identifier == identifier && acc.password == password,
+      );
+    } catch (_) {
+      matched = null;
+    }
+
+    setState(() => _isLoading = false);
+
+    if (matched == null) {
+      setState(() {
+        _loginError =
+            'NIK/email atau kata sandi salah. Periksa kembali dan coba lagi.';
+      });
+      return;
+    }
+
+    if (!mounted) return;
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (_) => HomeScreen(
+          userName: matched!.nama,
+          userEmail: matched.email,
+        ),
+      ),
+      (route) => false,
+    );
   }
 
   @override
@@ -54,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       body: Column(
         children: [
-          // ── Header putih — konsisten dengan header stepper Daftar ──
+          // ── Header ────────────────────────────────────────────────
           Container(
             width: double.infinity,
             color: AppTheme.surface,
@@ -78,19 +172,53 @@ class _LoginScreenState extends State<LoginScreen> {
                 padding: const EdgeInsets.all(20),
                 children: [
 
-                  // ── Nomor Telepon / Email ──────────────────────────
-                  _label('Nomor Telepon / Email', required: true),
+                  // ── Banner error kredensial ────────────────────────
+                  if (_loginError != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFE4E6),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFFCA5A5)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.error_outline,
+                              color: Color(0xFFE11D48), size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _loginError!,
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: const Color(0xFFE11D48),
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // ── NIK / Email ────────────────────────────────────
+                  _label('NIK / Email', required: true),
                   const SizedBox(height: 6),
                   TextFormField(
                     controller: _identifierController,
                     keyboardType: TextInputType.emailAddress,
                     style: GoogleFonts.poppins(fontSize: 14),
+                    onChanged: (_) {
+                      if (_loginError != null) {
+                        setState(() => _loginError = null);
+                      }
+                    },
                     decoration: const InputDecoration(
-                      hintText: 'Masukkan nomor telepon atau email Anda',
+                      hintText: 'Masukkan NIK atau email Anda',
                     ),
-                    validator: (v) => v!.isEmpty
-                        ? 'Nomor telepon / email tidak boleh kosong'
-                        : null,
+                    validator: _validateIdentifier,
                   ),
                   const SizedBox(height: 16),
 
@@ -101,6 +229,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     style: GoogleFonts.poppins(fontSize: 14),
+                    onChanged: (_) {
+                      if (_loginError != null) {
+                        setState(() => _loginError = null);
+                      }
+                    },
                     decoration: InputDecoration(
                       hintText: 'Masukkan kata sandi Anda',
                       suffixIcon: IconButton(
@@ -115,11 +248,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             () => _obscurePassword = !_obscurePassword),
                       ),
                     ),
-                    validator: (v) =>
-                        v!.isEmpty ? 'Kata sandi tidak boleh kosong' : null,
+                    validator: _validatePassword,
                   ),
 
-                  // ── Lupa Kata Sandi (dummy) ────────────────────────
+                  // ── Lupa Kata Sandi (nonaktif — belum diimplementasi)
                   const SizedBox(height: 8),
                   Align(
                     alignment: Alignment.centerRight,
@@ -131,12 +263,55 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
+
+                  // ── Hint akun demo (hanya untuk prototype) ─────────
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryLight,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                          color: AppTheme.primary.withOpacity(0.3)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.info_outline,
+                                color: AppTheme.primary, size: 16),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Akun Demo',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'NIK      : 3201234567890001\n'
+                          'Email    : user@desktra.com\n'
+                          'Password : Password1',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: AppTheme.primaryDark,
+                            height: 1.7,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
 
-          // ── Bottom Buttons — konsisten dengan tombol LANJUT Daftar ─
+          // ── Bottom Buttons ─────────────────────────────────────────
           Container(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             decoration: BoxDecoration(
@@ -207,8 +382,7 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           TextSpan(text: text),
           if (required)
-            const TextSpan(
-                text: ' *', style: TextStyle(color: Colors.red)),
+            const TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
         ],
       ),
     );

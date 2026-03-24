@@ -57,17 +57,15 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Column(
                     children: [
                       // ── Logo ─────────────────────────────────────────
-                      // Ganti dengan:
-                      // Image.asset('assets/images/logo.png', width: 140, height: 140)
-                      Image.asset('assets/images/logo.png', width: 240, height: 240),
-                      const SizedBox(height: 16),
+                      Image.asset('assets/images/Logo.png', width: 240, height: 240),
+                      const SizedBox(height: 0),
                       Text(
                         'DESKTRA',
                         style: GoogleFonts.poppins(
                           fontSize: 28,
                           fontWeight: FontWeight.w700,
                           color: AppTheme.primary,
-                          // letterSpacing: 3,
+                          letterSpacing: 3,
                         ),
                       ),
                       const SizedBox(height: 48),
@@ -81,7 +79,7 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Lorem Ipsum',
+                        'Lorem ipsum',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.poppins(
                           fontSize: 14,
@@ -122,32 +120,4 @@ class _SplashScreenState extends State<SplashScreen>
   }
 }
 
-class LogoPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppTheme.primary
-      ..style = PaintingStyle.fill;
 
-    final path = Path();
-    path.moveTo(size.width * 0.15, size.height * 0.3);
-    path.lineTo(size.width * 0.65, size.height * 0.5);
-    path.lineTo(size.width * 0.15, size.height * 0.7);
-    path.lineTo(size.width * 0.25, size.height * 0.5);
-    path.close();
-
-    final path2 = Path();
-    path2.moveTo(size.width * 0.4, size.height * 0.3);
-    path2.lineTo(size.width * 0.9, size.height * 0.5);
-    path2.lineTo(size.width * 0.4, size.height * 0.7);
-    path2.lineTo(size.width * 0.5, size.height * 0.5);
-    path2.close();
-
-    canvas.drawPath(path, paint);
-    paint.color = AppTheme.primary.withOpacity(0.5);
-    canvas.drawPath(path2, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}

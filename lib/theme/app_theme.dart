@@ -16,7 +16,8 @@ class AppTheme {
         colorScheme: ColorScheme.fromSeed(
           seedColor: primary,
           primary: primary,
-          background: background,
+          // FIX: 'background' deprecated sejak Flutter 3.18, dihapus.
+          // Warna background scaffold diatur via scaffoldBackgroundColor.
           surface: surface,
         ),
         scaffoldBackgroundColor: background,

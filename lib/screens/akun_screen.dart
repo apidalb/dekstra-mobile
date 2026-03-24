@@ -2,371 +2,263 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import 'splash_screen.dart';
+import 'profil_screen.dart';
 
 class AkunScreen extends StatelessWidget {
   final String userName;
+  final String userEmail;
 
-  const AkunScreen({super.key, required this.userName});
+  const AkunScreen({
+    super.key,
+    required this.userName,
+    required this.userEmail,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final initial = userName.isNotEmpty ? userName[0].toUpperCase() : 'U';
+
     return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Profile card
+          // ── Header (konsisten dengan dashboard) ──────────────────────
           Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppTheme.surface,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
+            color: AppTheme.surface,
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
             child: Row(
               children: [
                 Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: Colors.pink.shade100,
+                  width: 46, height: 46,
+                  decoration: const BoxDecoration(
+                    color: AppTheme.primaryLight,
                     shape: BoxShape.circle,
                   ),
-                  child: const Center(
-                    child: Text('👩', style: TextStyle(fontSize: 30)),
+                  child: Center(
+                    child: Text(
+                      initial,
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.primary,
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 14),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      userName,
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textPrimary,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        userName,
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    Text(
-                      '@gmail.com',
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: AppTheme.textSecondary,
+                      Text(
+                        userEmail,
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const Divider(height: 1, color: AppTheme.border),
 
-          // Menu items
-          _MenuCard(
-            items: [
-              _MenuItem(
-                icon: Icons.person_outline,
-                title: 'Akun Saya',
-                subtitle: 'Lorem Ipsum',
-                onTap: () => _showAkunSaya(context),
-              ),
-              _MenuItem(
-                icon: Icons.lock_outline,
-                title: 'Ganti Kata Sandi',
-                subtitle: 'Lorem Ipsum',
-                onTap: () => _showGantiPassword(context),
-              ),
-              _MenuItem(
-                icon: Icons.logout,
-                title: 'Keluar',
-                subtitle: 'Lorem Ipsum',
-                showDivider: false,
-                onTap: () => _showLogoutDialog(context),
-              ),
-            ],
+          // ── Menu items ───────────────────────────────────────────────
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.surface,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppTheme.border),
+                  ),
+                  child: Column(
+                    children: [
+                      _menuItem(
+                        icon: Icons.person_outline,
+                        title: 'Akun Saya',
+                        subtitle: 'Lihat informasi akun Anda',
+                        showDivider: true,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ProfilScreen(
+                              userName: userName,
+                              userEmail: userEmail,
+                            ),
+                          ),
+                        ),
+                      ),
+                      _menuItem(
+                        icon: Icons.lock_outline,
+                        title: 'Ganti Kata Sandi',
+                        subtitle: 'Ubah kata sandi akun Anda',
+                        showDivider: true,
+                        onTap: () {},
+                      ),
+                      _menuItem(
+                        icon: Icons.logout,
+                        title: 'Keluar',
+                        subtitle: 'Keluar dari akun ini',
+                        showDivider: false,
+                        isDestructive: true,
+                        onTap: () => _showLogoutDialog(context),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showAkunSaya(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => Padding(
-        padding: EdgeInsets.only(
-          left: 24,
-          right: 24,
-          top: 24,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Akun Saya',
-                style: GoogleFonts.poppins(
-                    fontSize: 18, fontWeight: FontWeight.w700)),
-            const Divider(),
-            const SizedBox(height: 8),
-            _InfoRow(label: 'Nama', value: userName),
-            const _InfoRow(label: 'Email', value: 'user@gmail.com'),
-            const _InfoRow(label: 'NIK', value: '3201xxxxxxxxxx'),
-            const _InfoRow(label: 'Telepon', value: '+62 8xx-xxxx-xxxx'),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Tutup'),
+  Widget _menuItem({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    bool showDivider = true,
+    bool isDestructive = false,
+  }) {
+    final color = isDestructive ? Colors.red : AppTheme.primary;
+    return Column(
+      children: [
+        ListTile(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          leading: Container(
+            width: 40, height: 40,
+            decoration: BoxDecoration(
+              color: isDestructive
+                  ? Colors.red.withOpacity(0.1)
+                  : AppTheme.primaryLight,
+              borderRadius: BorderRadius.circular(10),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showGantiPassword(BuildContext context) {
-    final oldPass = TextEditingController();
-    final newPass = TextEditingController();
-    final confirmPass = TextEditingController();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => StatefulBuilder(
-        builder: (context, setState) => Padding(
-          padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: 24,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            child: Icon(icon, color: color, size: 20),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Ganti Kata Sandi',
-                  style: GoogleFonts.poppins(
-                      fontSize: 18, fontWeight: FontWeight.w700)),
-              const Divider(),
-              const SizedBox(height: 12),
-              Text('Kata Sandi Lama',
-                  style: GoogleFonts.poppins(
-                      fontSize: 14, fontWeight: FontWeight.w500)),
-              const SizedBox(height: 6),
-              TextField(
-                  controller: oldPass,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                      hintText: 'Masukkan kata sandi lama')),
-              const SizedBox(height: 12),
-              Text('Kata Sandi Baru',
-                  style: GoogleFonts.poppins(
-                      fontSize: 14, fontWeight: FontWeight.w500)),
-              const SizedBox(height: 6),
-              TextField(
-                  controller: newPass,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                      hintText: 'Masukkan kata sandi baru')),
-              const SizedBox(height: 12),
-              Text('Konfirmasi Kata Sandi Baru',
-                  style: GoogleFonts.poppins(
-                      fontSize: 14, fontWeight: FontWeight.w500)),
-              const SizedBox(height: 6),
-              TextField(
-                  controller: confirmPass,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                      hintText: 'Ulangi kata sandi baru')),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Kata sandi berhasil diubah!',
-                          style: GoogleFonts.poppins()),
-                      backgroundColor: AppTheme.primary,
-                    ),
-                  );
-                },
-                child: const Text('Simpan'),
-              ),
-            ],
+          title: Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: isDestructive ? Colors.red : AppTheme.textPrimary,
+            ),
           ),
+          subtitle: Text(
+            subtitle,
+            style: GoogleFonts.poppins(
+                fontSize: 12, color: AppTheme.textSecondary),
+          ),
+          trailing: Icon(Icons.arrow_forward_ios,
+              size: 14,
+              color: isDestructive
+                  ? Colors.red.withOpacity(0.5)
+                  : AppTheme.textSecondary),
+          onTap: onTap,
         ),
-      ),
+        if (showDivider)
+          const Divider(height: 1, indent: 70, color: AppTheme.border),
+      ],
     );
   }
 
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Keluar',
-            style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
-        content: Text(
-          'Apakah Anda yakin ingin keluar dari akun ini?',
-          style: GoogleFonts.poppins(
-              fontSize: 14, color: AppTheme.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Batal',
-                style:
-                    GoogleFonts.poppins(color: AppTheme.textSecondary)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const SplashScreen()),
-                (route) => false,
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              minimumSize: const Size(80, 40),
-            ),
-            child: const Text('Keluar'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MenuCard extends StatelessWidget {
-  final List<_MenuItem> items;
-
-  const _MenuCard({required this.items});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: items.asMap().entries.map((entry) {
-          final item = entry.value;
-          final isLast = entry.key == items.length - 1;
-          return Column(
+      barrierColor: Colors.black.withOpacity(0.35),
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16)),
+        backgroundColor: AppTheme.surface,
+        insetPadding:
+            const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ListTile(
-                leading: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: AppTheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
+              // Header row
+              Row(
+                children: [
+                  Container(
+                    width: 40, height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.logout,
+                        color: Colors.red, size: 20),
                   ),
-                  child: Icon(item.icon,
-                      color: AppTheme.primary, size: 22),
-                ),
-                title: Text(
-                  item.title,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: AppTheme.textPrimary,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Keluar dari Akun?',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
                   ),
-                ),
-                subtitle: Text(
-                  item.subtitle,
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-                trailing: const Icon(Icons.arrow_forward_ios,
-                    size: 14, color: AppTheme.textSecondary),
-                onTap: item.onTap,
+                ],
               ),
-              if (!isLast && item.showDivider)
-                const Divider(indent: 70, height: 1),
+              const SizedBox(height: 12),
+              const Divider(color: AppTheme.border),
+              const SizedBox(height: 12),
+              Text(
+                'Apakah Anda yakin ingin keluar dari akun ini?',
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  color: AppTheme.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Batal'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const SplashScreen()),
+                        (route) => false,
+                      ),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red),
+                      child: const Text('Keluar'),
+                    ),
+                  ),
+                ],
+              ),
             ],
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
-
-class _MenuItem {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-  final bool showDivider;
-
-  const _MenuItem({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-    this.showDivider = true,
-  });
-}
-
-class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _InfoRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: GoogleFonts.poppins(
-                  fontSize: 13, color: AppTheme.textSecondary),
-            ),
           ),
-          Text(': ',
-              style: GoogleFonts.poppins(
-                  fontSize: 13, color: AppTheme.textSecondary)),
-          Expanded(
-            child: Text(
-              value,
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
