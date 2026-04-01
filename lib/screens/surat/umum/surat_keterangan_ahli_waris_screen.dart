@@ -166,7 +166,7 @@ class _SuratKeteranganAhliWarisScreenState
                     decoration: const InputDecoration(hintText: 'Masukkan nama lengkap'),
                     validator: (v) => validateRequired(v, 'Nama'),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
 
                   fieldLabel('NIK', required: true),
                   const SizedBox(height: 6),
@@ -179,7 +179,7 @@ class _SuratKeteranganAhliWarisScreenState
                         hintText: 'Masukkan 16 digit NIK'),
                     validator: validateNIK,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
 
                   fieldLabel('Tempat Lahir', required: true),
                   const SizedBox(height: 6),
@@ -190,7 +190,7 @@ class _SuratKeteranganAhliWarisScreenState
                         hintText: 'Masukkan tempat lahir'),
                     validator: (v) => validateRequired(v, 'Tempat lahir'),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
 
                   fieldLabel('Tanggal Lahir', required: true),
                   const SizedBox(height: 6),
@@ -205,9 +205,9 @@ class _SuratKeteranganAhliWarisScreenState
                           size: 16, color: AppTheme.textSecondary),
                     ),
                     validator: (v) =>
-                        v!.isEmpty ? 'Tanggal lahir wajib diisi' : null,
+                        validateDate(v, 'Tanggal lahir'),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
 
                   fieldLabel('Alamat', required: true),
                   const SizedBox(height: 6),

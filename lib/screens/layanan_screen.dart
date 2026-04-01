@@ -9,6 +9,17 @@ import 'surat/umum/permohonan_izin_keramaian_screen.dart';
 import 'surat/umum/surat_pengantar_skck_screen.dart';
 import 'surat/umum/surat_keterangan_ahli_waris_screen.dart';
 import 'surat/umum/surat_keterangan_lainnya_screen.dart';
+import 'surat/kependudukan/formulir_kk_pengganti_screen.dart';
+import 'surat/kependudukan/formulir_pendaftaran_peristiwa_screen.dart';
+import 'surat/kependudukan/formulir_kk_baru_screen.dart';
+import 'surat/kependudukan/formulir_perubahan_kk_screen.dart';
+import 'surat/kependudukan/formulir_ktp_screen.dart';
+import 'surat/kependudukan/surat_keterangan_domisili_screen.dart';
+import 'surat/kependudukan/surat_keterangan_hilang_kk_screen.dart';
+import 'surat/kependudukan/surat_keterangan_pindah_screen.dart';
+import 'surat/kependudukan/formulir_perpindahan_penduduk_screen.dart';
+import 'surat/kependudukan/surat_keterangan_kelahiran_screen.dart';
+import 'surat/kependudukan/surat_keterangan_kematian_screen.dart';
 
 // ── Data Model ────────────────────────────────────────────────────────────────
 class _JenisSurat {
@@ -208,7 +219,7 @@ class _LayananScreenState extends State<LayananScreen>
                       crossAxisCount: 2,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
-                      childAspectRatio: 0.78,
+                      childAspectRatio: 0.75,
                     ),
                     itemCount: _currentList.length,
                     itemBuilder: (_, i) => _SuratCard(
@@ -249,6 +260,39 @@ class _LayananScreenState extends State<LayananScreen>
       case 'Surat Keterangan Lainnya':
         screen = const SuratKeteranganLainnyaScreen();
         break;
+      case 'Formulir Kartu Keluarga (F-1.01)':
+        screen = const FormulirKkPenggantiScreen();
+        break;
+      case 'Formulir Pendaftaran Peristiwa Kependudukan (F-1.02)':
+        screen = const FormulirPendaftaranPeristiwaScreen();
+        break;
+      case 'Formulir Permohonan KK Baru WNI (F-1.15)':
+        screen = const FormulirKkBaruScreen();
+        break;
+      case 'Formulir Permohonan Perubahan KK WNI (F-1.16)':
+        screen = const FormulirPerubahanKkScreen();
+        break;
+      case 'Formulir Permohonan KTP (F-1.21)':
+        screen = const FormulirKtpScreen();
+        break;
+      case 'Surat Keterangan Domisili':
+        screen = const SuratKeteranganDomisiliScreen();
+        break;
+      case 'Surat Keterangan Hilang Kartu Keluarga':
+        screen = const SuratKeteranganHilangKkScreen();
+        break;
+      case 'Surat Keterangan Pindah':
+        screen = const SuratKeteranganPindahScreen();
+        break;
+      case 'Formulir Pendaftaran Perpindahan Penduduk (F-1.03)':
+        screen = const FormulirPerpindahanPendudukScreen();
+        break;
+      case 'Surat Keterangan Kelahiran (F-2.01)':
+        screen = const SuratKeteranganKelahiranScreen();
+        break;
+      case 'Surat Keterangan Kematian (F-2.29)':
+        screen = const SuratKeteranganKematianScreen();
+        break;
       default:
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Form "$namaSurat" belum tersedia',
@@ -287,33 +331,28 @@ class _SuratCard extends StatelessWidget {
         children: [
           // Icon area
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryLight,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.description_outlined,
-                      color: AppTheme.primary, size: 22),
-                ),
-              ],
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: AppTheme.primaryLight,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.description_outlined,
+                  color: AppTheme.primary, size: 20),
             ),
           ),
 
-          const Divider(height: 1, indent: 14, endIndent: 14),
+          const Divider(height: 1, indent: 12, endIndent: 12),
 
           // Nama surat
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 8, 14, 4),
+            padding: const EdgeInsets.fromLTRB(12, 6, 12, 2),
             child: Text(
               surat.nama,
               style: GoogleFonts.poppins(
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: AppTheme.textPrimary,
                 height: 1.3,
@@ -326,13 +365,13 @@ class _SuratCard extends StatelessWidget {
           // Deskripsi — Flexible agar tidak overflow
           Flexible(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
               child: Text(
                 surat.deskripsi,
                 style: GoogleFonts.poppins(
                   fontSize: 10,
                   color: AppTheme.textSecondary,
-                  height: 1.4,
+                  height: 1.35,
                 ),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
@@ -342,16 +381,16 @@ class _SuratCard extends StatelessWidget {
 
           // Tombol Pilih Surat
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: onTap,
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 36),
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  minimumSize: const Size(double.infinity, 34),
+                  padding: const EdgeInsets.symmetric(vertical: 7),
                   textStyle: GoogleFonts.poppins(
-                      fontSize: 12, fontWeight: FontWeight.w600),
+                      fontSize: 11, fontWeight: FontWeight.w600),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
                 ),

@@ -543,40 +543,6 @@ class _BerandaTabState extends State<_BerandaTab> {
     );
   }
 
-  // ── Hapus item ─────────────────────────────────────────────────────────────
-  void _hapusPermohonan(Permohonan item) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.4),
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Hapus Permohonan?',
-            style: GoogleFonts.poppins(
-                fontSize: 16, fontWeight: FontWeight.w700)),
-        content: Text(
-          'Permohonan "${item.jenisSurat}" akan dihapus permanen.',
-          style: GoogleFonts.poppins(fontSize: 13, color: AppTheme.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Batal',
-                style: GoogleFonts.poppins(color: AppTheme.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() => _list.remove(item));
-            },
-            child: Text('Hapus',
-                style: GoogleFonts.poppins(
-                    color: Colors.red, fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   void dispose() {
     _closeNotif();

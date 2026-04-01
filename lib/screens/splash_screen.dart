@@ -79,7 +79,7 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Lorem ipsum',
+                        'Layanan surat desa digital yang mudah, cepat, dan terpercaya.',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.poppins(
                           fontSize: 14,

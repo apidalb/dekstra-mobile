@@ -172,37 +172,16 @@ class _SuratKeteranganUsahaScreenState
           children: [
 
             // ── Nama Surat (read-only) ─────────────────────────────────
-            _sectionCard(children: [
-              _label('Nama Surat'),
-              const SizedBox(height: 6),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 13),
-                decoration: BoxDecoration(
-                  color: AppTheme.background,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppTheme.border),
-                ),
-                child: Text(
-                  'SURAT KETERANGAN USAHA',
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: AppTheme.textSecondary,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-              ),
-            ]),
+            namaSuratCard('SURAT KETERANGAN USAHA'),
             const SizedBox(height: 16),
 
             // ── Data Pemohon ───────────────────────────────────────────
-            _sectionCard(children: [
-              _sectionHeader('Data Pemohon'),
+            sectionCard(children: [
+              sectionHeader('Data Pemohon'),
               const SizedBox(height: 16),
 
               // NIK
-              _label('NIK', required: true),
+              fieldLabel('NIK', required: true),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _nikCtrl,
@@ -223,7 +202,7 @@ class _SuratKeteranganUsahaScreenState
               const SizedBox(height: 14),
 
               // Nama Lengkap
-              _label('Nama Lengkap', required: true),
+              fieldLabel('Nama Lengkap', required: true),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _namaCtrl,
@@ -236,7 +215,7 @@ class _SuratKeteranganUsahaScreenState
               const SizedBox(height: 14),
 
               // Tempat Lahir
-              _label('Tempat Lahir', required: true),
+              fieldLabel('Tempat Lahir', required: true),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _tempatLahirCtrl,
@@ -249,7 +228,7 @@ class _SuratKeteranganUsahaScreenState
               const SizedBox(height: 14),
 
               // Tanggal Lahir
-              _label('Tanggal Lahir', required: true),
+              fieldLabel('Tanggal Lahir', required: true),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _tanggalLahirCtrl,
@@ -262,16 +241,16 @@ class _SuratKeteranganUsahaScreenState
                       size: 16, color: AppTheme.textSecondary),
                 ),
                 validator: (v) =>
-                    v!.isEmpty ? 'Tanggal lahir wajib diisi' : null,
+                    validateDate(v, 'Tanggal lahir'),
               ),
               const SizedBox(height: 14),
 
               // Jenis Kelamin
-              _label('Jenis Kelamin', required: true),
+              fieldLabel('Jenis Kelamin', required: true),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
                 value: _jenisKelamin,
-                decoration: _dropdownDeco('Pilih jenis kelamin'),
+                decoration: dropdownDeco('Pilih jenis kelamin'),
                 items: ['Laki-laki', 'Perempuan']
                     .map((e) => DropdownMenuItem(
                           value: e,
@@ -286,7 +265,7 @@ class _SuratKeteranganUsahaScreenState
               const SizedBox(height: 14),
 
               // Kewarganegaraan
-              _label('Kewarganegaraan', required: true),
+              fieldLabel('Kewarganegaraan', required: true),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _kewarganegaraanCtrl,
@@ -299,11 +278,11 @@ class _SuratKeteranganUsahaScreenState
               const SizedBox(height: 14),
 
               // Agama
-              _label('Agama', required: true),
+              fieldLabel('Agama', required: true),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
                 value: _agama,
-                decoration: _dropdownDeco('Pilih agama'),
+                decoration: dropdownDeco('Pilih agama'),
                 items: _agamaList
                     .map((e) => DropdownMenuItem(
                           value: e,
@@ -318,7 +297,7 @@ class _SuratKeteranganUsahaScreenState
               const SizedBox(height: 14),
 
               // Pekerjaan
-              _label('Pekerjaan', required: true),
+              fieldLabel('Pekerjaan', required: true),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _pekerjaanCtrl,
@@ -331,7 +310,7 @@ class _SuratKeteranganUsahaScreenState
               const SizedBox(height: 14),
 
               // Alamat
-              _label('Alamat', required: true),
+              fieldLabel('Alamat', required: true),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _alamatCtrl,
@@ -345,7 +324,7 @@ class _SuratKeteranganUsahaScreenState
               const SizedBox(height: 14),
 
               // No HP / WA
-              _label('No. HP / WhatsApp', required: true),
+              fieldLabel('No. HP / WhatsApp', required: true),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _noHpCtrl,
@@ -368,12 +347,12 @@ class _SuratKeteranganUsahaScreenState
             const SizedBox(height: 16),
 
             // ── Data Usaha ─────────────────────────────────────────────
-            _sectionCard(children: [
-              _sectionHeader('Data Usaha'),
+            sectionCard(children: [
+              sectionHeader('Data Usaha'),
               const SizedBox(height: 16),
 
               // Nama Usaha
-              _label('Nama Usaha', required: true),
+              fieldLabel('Nama Usaha', required: true),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _namaUsahaCtrl,
@@ -386,7 +365,7 @@ class _SuratKeteranganUsahaScreenState
               const SizedBox(height: 14),
 
               // Jenis Usaha
-              _label('Jenis Usaha', required: true),
+              fieldLabel('Jenis Usaha', required: true),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _jenisUsahaCtrl,
@@ -399,7 +378,7 @@ class _SuratKeteranganUsahaScreenState
               const SizedBox(height: 14),
 
               // Alamat Usaha
-              _label('Alamat Usaha', required: true),
+              fieldLabel('Alamat Usaha', required: true),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _alamatUsahaCtrl,
@@ -413,7 +392,7 @@ class _SuratKeteranganUsahaScreenState
               const SizedBox(height: 14),
 
               // Tujuan Pengajuan
-              _label('Tujuan Pengajuan', required: true),
+              fieldLabel('Tujuan Pengajuan', required: true),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _tujuanCtrl,
@@ -438,81 +417,4 @@ class _SuratKeteranganUsahaScreenState
     );
   }
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-
-  Widget _sectionCard({required List<Widget> children}) => Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppTheme.border),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: children,
-        ),
-      );
-
-  Widget _sectionHeader(String title) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: GoogleFonts.poppins(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 10),
-          const Divider(height: 1, color: AppTheme.border),
-        ],
-      );
-
-  Widget _label(String text, {bool required = false}) => RichText(
-        text: TextSpan(
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: AppTheme.textPrimary,
-          ),
-          children: [
-            TextSpan(text: text),
-            if (required)
-              const TextSpan(
-                  text: ' *', style: TextStyle(color: Colors.red)),
-          ],
-        ),
-      );
-
-  InputDecoration _dropdownDeco(String hint) => InputDecoration(
-        hintText: hint,
-        hintStyle: GoogleFonts.poppins(
-            fontSize: 13, color: AppTheme.textSecondary),
-        filled: true,
-        fillColor: AppTheme.surface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppTheme.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppTheme.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide:
-              const BorderSide(color: AppTheme.primary, width: 1.5),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.red),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.red, width: 1.5),
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-      );
 }

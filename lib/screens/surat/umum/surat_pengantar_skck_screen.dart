@@ -113,7 +113,7 @@ class _SuratPengantarSkckScreenState
                   suffixIcon: Icon(Icons.calendar_today,
                       size: 16, color: AppTheme.textSecondary),
                 ),
-                validator: (v) => v!.isEmpty ? 'Tanggal lahir wajib diisi' : null,
+                validator: (v) => validateDate(v, 'Tanggal lahir'),
               ),
               const SizedBox(height: 14),
 

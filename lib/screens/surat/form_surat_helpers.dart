@@ -296,3 +296,210 @@ List<TextInputFormatter> get nikFormatters => [
 List<TextInputFormatter> get angkaFormatters => [
       FilteringTextInputFormatter.digitsOnly,
     ];
+
+
+// ── Helpers khusus kependudukan ──────────────────────────────────────────────
+// ── Konstanta bersama ─────────────────────────────────────────────────────────
+const kShdkList = [
+  'Kepala Keluarga', 'Suami', 'Istri', 'Anak', 'Menantu',
+  'Cucu', 'Orang Tua', 'Mertua', 'Famili Lain', 'Pembantu', 'Lainnya',
+];
+
+const kAlasanKkList = [
+  'Membentuk Keluarga Baru', 'Pergantian Kepala Keluarga',
+  'Pisah KK', 'Pindah Datang', 'Numpang KK',
+  'WNI dari LN karena Pindah', 'Rentan Adminduk',
+];
+
+// ── Model anggota keluarga ────────────────────────────────────────────────────
+class AnggotaKK {
+  final namaCtrl = TextEditingController();
+  final nikCtrl  = TextEditingController();
+  String? shdk;
+  void dispose() { namaCtrl.dispose(); nikCtrl.dispose(); }
+}
+
+// ── Section Data Wilayah (vertikal) ──────────────────────────────────────────
+Widget buildDataWilayah({
+  required TextEditingController provinsi,
+  required TextEditingController kabKota,
+  required TextEditingController kecamatan,
+  required TextEditingController desa,
+}) {
+  return sectionCard(children: [
+    sectionHeader('Data Wilayah'),
+    const SizedBox(height: 16),
+
+    fieldLabel('Nama Pemerintah Provinsi', required: true),
+    const SizedBox(height: 6),
+    TextFormField(controller: provinsi, style: GoogleFonts.poppins(fontSize: 13),
+      decoration: const InputDecoration(hintText: 'Contoh: Jawa Tengah'),
+      validator: (v) => validateRequired(v, 'Provinsi')),
+    const SizedBox(height: 14),
+
+    fieldLabel('Nama Pemerintah Kabupaten/Kota', required: true),
+    const SizedBox(height: 6),
+    TextFormField(controller: kabKota, style: GoogleFonts.poppins(fontSize: 13),
+      decoration: const InputDecoration(hintText: 'Contoh: Kota Semarang'),
+      validator: (v) => validateRequired(v, 'Kabupaten/Kota')),
+    const SizedBox(height: 14),
+
+    fieldLabel('Nama Kecamatan', required: true),
+    const SizedBox(height: 6),
+    TextFormField(controller: kecamatan, style: GoogleFonts.poppins(fontSize: 13),
+      decoration: const InputDecoration(hintText: 'Contoh: Semarang Tengah'),
+      validator: (v) => validateRequired(v, 'Kecamatan')),
+    const SizedBox(height: 14),
+
+    fieldLabel('Nama Kelurahan/Desa', required: true),
+    const SizedBox(height: 6),
+    TextFormField(controller: desa, style: GoogleFonts.poppins(fontSize: 13),
+      decoration: const InputDecoration(hintText: 'Contoh: Miroto'),
+      validator: (v) => validateRequired(v, 'Desa/Kelurahan')),
+  ]);
+}
+
+// ── Tabel anggota keluarga ────────────────────────────────────────────────────
+Widget buildTabelAnggota(List<AnggotaKK> anggota, StateSetter setState) {
+  return sectionCard(children: [
+    sectionHeader('Data Anggota Keluarga'),
+    const SizedBox(height: 12),
+    ...List.generate(anggota.length, (i) {
+      final a = anggota[i];
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 14),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Text('${i + 1}.',
+                style: GoogleFonts.poppins(fontSize: 13,
+                    fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+            const Spacer(),
+            if (anggota.length > 1)
+              GestureDetector(
+                onTap: () { a.dispose(); setState(() => anggota.removeAt(i)); },
+                child: Text('Hapus',
+                    style: GoogleFonts.poppins(fontSize: 12,
+                        color: Colors.red, fontWeight: FontWeight.w500)),
+              ),
+          ]),
+          const SizedBox(height: 8),
+          fieldLabel('Nama Lengkap', required: true),
+          const SizedBox(height: 6),
+          TextFormField(controller: a.namaCtrl,
+            style: GoogleFonts.poppins(fontSize: 13),
+            decoration: const InputDecoration(hintText: 'Masukkan nama lengkap'),
+            validator: (v) => validateRequired(v, 'Nama')),
+          const SizedBox(height: 10),
+          fieldLabel('NIK', required: true),
+          const SizedBox(height: 6),
+          TextFormField(controller: a.nikCtrl,
+            keyboardType: TextInputType.number, inputFormatters: nikFormatters,
+            style: GoogleFonts.poppins(fontSize: 13),
+            decoration: const InputDecoration(hintText: 'Masukkan 16 digit NIK'),
+            validator: validateNIK),
+          const SizedBox(height: 10),
+          fieldLabel('Status Hubungan dalam Keluarga', required: true),
+          const SizedBox(height: 6),
+          DropdownButtonFormField<String>(value: a.shdk,
+            decoration: dropdownDeco('Pilih status hubungan'),
+            items: kShdkList.map((e) => DropdownMenuItem(value: e,
+                child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
+            onChanged: (v) => setState(() => a.shdk = v),
+            validator: (v) => v == null ? 'Wajib dipilih' : null),
+          if (i < anggota.length - 1)
+            const Padding(
+              padding: EdgeInsets.only(top: 14),
+              child: Divider(height: 1, color: AppTheme.border),
+            ),
+        ]),
+      );
+    }),
+    TextButton.icon(
+      onPressed: () => setState(() => anggota.add(AnggotaKK())),
+      icon: const Icon(Icons.add, size: 16),
+      label: Text('Tambah Anggota',
+          style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500)),
+    ),
+  ]);
+}
+
+// ── Blok alamat lengkap (vertikal) ────────────────────────────────────────────
+List<Widget> buildAlamatBlock({
+  required TextEditingController alamat,
+  required TextEditingController rt,
+  required TextEditingController rw,
+  required TextEditingController desa,
+  required TextEditingController kec,
+  required TextEditingController kab,
+  required TextEditingController prov,
+  required TextEditingController kodePos,
+}) {
+  return [
+    fieldLabel('Alamat', required: true),
+    const SizedBox(height: 6),
+    TextFormField(controller: alamat, maxLines: 2,
+      style: GoogleFonts.poppins(fontSize: 13),
+      decoration: const InputDecoration(hintText: 'Masukkan alamat'),
+      validator: (v) => validateRequired(v, 'Alamat')),
+    const SizedBox(height: 12),
+
+    fieldLabel('RT', required: true),
+    const SizedBox(height: 6),
+    TextFormField(controller: rt, keyboardType: TextInputType.number,
+      inputFormatters: angkaFormatters, style: GoogleFonts.poppins(fontSize: 13),
+      decoration: const InputDecoration(hintText: 'Contoh: 001'),
+      validator: (v) => validateRequired(v, 'RT')),
+    const SizedBox(height: 12),
+
+    fieldLabel('RW', required: true),
+    const SizedBox(height: 6),
+    TextFormField(controller: rw, keyboardType: TextInputType.number,
+      inputFormatters: angkaFormatters, style: GoogleFonts.poppins(fontSize: 13),
+      decoration: const InputDecoration(hintText: 'Contoh: 002'),
+      validator: (v) => validateRequired(v, 'RW')),
+    const SizedBox(height: 12),
+
+    fieldLabel('Desa/Kelurahan', required: true),
+    const SizedBox(height: 6),
+    TextFormField(controller: desa, style: GoogleFonts.poppins(fontSize: 13),
+      decoration: const InputDecoration(hintText: 'Masukkan desa/kelurahan'),
+      validator: (v) => validateRequired(v, 'Desa')),
+    const SizedBox(height: 12),
+
+    fieldLabel('Kecamatan', required: true),
+    const SizedBox(height: 6),
+    TextFormField(controller: kec, style: GoogleFonts.poppins(fontSize: 13),
+      decoration: const InputDecoration(hintText: 'Masukkan kecamatan'),
+      validator: (v) => validateRequired(v, 'Kecamatan')),
+    const SizedBox(height: 12),
+
+    fieldLabel('Kabupaten/Kota', required: true),
+    const SizedBox(height: 6),
+    TextFormField(controller: kab, style: GoogleFonts.poppins(fontSize: 13),
+      decoration: const InputDecoration(hintText: 'Masukkan kabupaten/kota'),
+      validator: (v) => validateRequired(v, 'Kabupaten/Kota')),
+    const SizedBox(height: 12),
+
+    fieldLabel('Provinsi', required: true),
+    const SizedBox(height: 6),
+    TextFormField(controller: prov, style: GoogleFonts.poppins(fontSize: 13),
+      decoration: const InputDecoration(hintText: 'Masukkan provinsi'),
+      validator: (v) => validateRequired(v, 'Provinsi')),
+    const SizedBox(height: 12),
+
+    fieldLabel('Kode Pos', required: true),
+    const SizedBox(height: 6),
+    TextFormField(controller: kodePos, keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(5)],
+      style: GoogleFonts.poppins(fontSize: 13),
+      decoration: const InputDecoration(hintText: 'Contoh: 50271'),
+      validator: (v) => validateRequired(v, 'Kode Pos')),
+  ];
+}
+
+// ── Validator tanggal (readOnly date fields) ──────────────────────────────────
+String? validateDate(String? v, String fieldName) {
+  if (v == null || v.isEmpty) return '$fieldName wajib diisi';
+  return null;
+}

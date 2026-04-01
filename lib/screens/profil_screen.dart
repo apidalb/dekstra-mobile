@@ -252,7 +252,7 @@ class ProfilScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                    'Hanya nama, nomor telepon, dan alamat yang dapat diubah.',
                     style: GoogleFonts.poppins(
                         fontSize: 12, color: AppTheme.textSecondary),
                   ),

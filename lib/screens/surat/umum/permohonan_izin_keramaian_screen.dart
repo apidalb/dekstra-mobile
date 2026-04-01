@@ -175,7 +175,7 @@ class _PermohonanIzinKeramaianScreenState
                   suffixIcon: Icon(Icons.calendar_today,
                       size: 16, color: AppTheme.textSecondary),
                 ),
-                validator: (v) => v!.isEmpty ? 'Tanggal acara wajib diisi' : null,
+                validator: (v) => validateDate(v, 'Tanggal acara'),
               ),
               const SizedBox(height: 14),
 
