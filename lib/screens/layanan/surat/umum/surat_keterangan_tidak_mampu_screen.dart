@@ -190,7 +190,7 @@ class _SuratKeteranganTidakMampuScreenState
               fieldLabel('Agama', required: true),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
-                value: _agama,
+                initialValue: _agama,
                 decoration: dropdownDeco('Pilih agama'),
                 items: kAgamaList
                     .map((e) => DropdownMenuItem(

@@ -85,7 +85,7 @@ class _KtpState extends State<FormulirKtpScreen> {
 
               fieldLabel('Permohonan KTP', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(value: _jenisKtp,
+              DropdownButtonFormField<String>(initialValue: _jenisKtp,
                 decoration: dropdownDeco('Pilih jenis permohonan KTP'),
                 items: _jenisKtpList.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),

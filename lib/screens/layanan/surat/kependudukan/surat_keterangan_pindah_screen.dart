@@ -129,7 +129,7 @@ class _PindahState extends State<SuratKeteranganPindahScreen> {
 
               fieldLabel('Jenis Kelamin', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(value: _jk,
+              DropdownButtonFormField<String>(initialValue: _jk,
                 decoration: dropdownDeco('Pilih jenis kelamin'),
                 items: kJenisKelaminList.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
@@ -139,7 +139,7 @@ class _PindahState extends State<SuratKeteranganPindahScreen> {
 
               fieldLabel('Agama', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(value: _agama,
+              DropdownButtonFormField<String>(initialValue: _agama,
                 decoration: dropdownDeco('Pilih agama'),
                 items: kAgamaList.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
@@ -157,7 +157,7 @@ class _PindahState extends State<SuratKeteranganPindahScreen> {
 
               fieldLabel('Status Pernikahan', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(value: _status,
+              DropdownButtonFormField<String>(initialValue: _status,
                 decoration: dropdownDeco('Pilih status'),
                 items: kStatusPernikahanList.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
@@ -243,7 +243,7 @@ class _PindahState extends State<SuratKeteranganPindahScreen> {
 
                   fieldLabel('Jenis Kelamin', required: true),
                   const SizedBox(height: 6),
-                  DropdownButtonFormField<String>(value: a.jk,
+                  DropdownButtonFormField<String>(initialValue: a.jk,
                     decoration: dropdownDeco('Pilih jenis kelamin'),
                     items: kJenisKelaminList.map((e) => DropdownMenuItem(value: e,
                         child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
@@ -253,7 +253,7 @@ class _PindahState extends State<SuratKeteranganPindahScreen> {
 
                   fieldLabel('SHDK (Status Hubungan Dalam Keluarga)', required: true),
                   const SizedBox(height: 6),
-                  DropdownButtonFormField<String>(value: a.shdkCtrl.text.isEmpty ? null : a.shdkCtrl.text,
+                  DropdownButtonFormField<String>(initialValue: a.shdkCtrl.text.isEmpty ? null : a.shdkCtrl.text,
                     decoration: dropdownDeco('Pilih SHDK'),
                     items: _shdkList.map((e) => DropdownMenuItem(value: e,
                         child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),

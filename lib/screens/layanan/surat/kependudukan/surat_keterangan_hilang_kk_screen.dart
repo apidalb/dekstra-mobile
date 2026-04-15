@@ -98,7 +98,7 @@ class _HilangKkState extends State<SuratKeteranganHilangKkScreen> {
 
               fieldLabel('Jenis Kelamin', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(value: _jk,
+              DropdownButtonFormField<String>(initialValue: _jk,
                 decoration: dropdownDeco('Pilih jenis kelamin'),
                 items: kJenisKelaminList.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
@@ -108,7 +108,7 @@ class _HilangKkState extends State<SuratKeteranganHilangKkScreen> {
 
               fieldLabel('Agama', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(value: _agama,
+              DropdownButtonFormField<String>(initialValue: _agama,
                 decoration: dropdownDeco('Pilih agama'),
                 items: kAgamaList.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),

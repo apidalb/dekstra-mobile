@@ -249,7 +249,7 @@ class _SuratKeteranganUsahaScreenState
               fieldLabel('Jenis Kelamin', required: true),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
-                value: _jenisKelamin,
+                initialValue: _jenisKelamin,
                 decoration: dropdownDeco('Pilih jenis kelamin'),
                 items: ['Laki-laki', 'Perempuan']
                     .map((e) => DropdownMenuItem(
@@ -281,7 +281,7 @@ class _SuratKeteranganUsahaScreenState
               fieldLabel('Agama', required: true),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
-                value: _agama,
+                initialValue: _agama,
                 decoration: dropdownDeco('Pilih agama'),
                 items: _agamaList
                     .map((e) => DropdownMenuItem(

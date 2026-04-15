@@ -103,7 +103,7 @@ class _DomisiliState extends State<SuratKeteranganDomisiliScreen> {
 
               fieldLabel('Jenis Kelamin', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(value: _jk,
+              DropdownButtonFormField<String>(initialValue: _jk,
                 decoration: dropdownDeco('Pilih jenis kelamin'),
                 items: kJenisKelaminList.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
@@ -113,7 +113,7 @@ class _DomisiliState extends State<SuratKeteranganDomisiliScreen> {
 
               fieldLabel('Agama', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(value: _agama,
+              DropdownButtonFormField<String>(initialValue: _agama,
                 decoration: dropdownDeco('Pilih agama'),
                 items: kAgamaList.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
@@ -131,7 +131,7 @@ class _DomisiliState extends State<SuratKeteranganDomisiliScreen> {
 
               fieldLabel('Status Pernikahan', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(value: _status,
+              DropdownButtonFormField<String>(initialValue: _status,
                 decoration: dropdownDeco('Pilih status pernikahan'),
                 items: kStatusPernikahanList.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),

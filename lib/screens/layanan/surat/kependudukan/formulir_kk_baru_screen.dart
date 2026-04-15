@@ -132,7 +132,7 @@ class _KkBaruState extends State<FormulirKkBaruScreen> {
 
               fieldLabel('Alasan Permohonan', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(value: _alasan,
+              DropdownButtonFormField<String>(initialValue: _alasan,
                 decoration: dropdownDeco('Pilih alasan permohonan'),
                 items: kAlasanKkList.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),

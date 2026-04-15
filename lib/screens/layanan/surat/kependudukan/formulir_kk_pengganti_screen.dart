@@ -178,7 +178,7 @@ class _KkPenggantiState extends State<FormulirKkPenggantiScreen> {
 
                   fieldLabel('Jenis Kelamin', required: true),
                   const SizedBox(height: 6),
-                  DropdownButtonFormField<String>(value: a.jk,
+                  DropdownButtonFormField<String>(initialValue: a.jk,
                     decoration: dropdownDeco('Pilih jenis kelamin'),
                     items: kJenisKelaminList.map((e) => DropdownMenuItem(value: e,
                         child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
@@ -228,7 +228,7 @@ class _KkPenggantiState extends State<FormulirKkPenggantiScreen> {
 
                   fieldLabel('Agama', required: true),
                   const SizedBox(height: 6),
-                  DropdownButtonFormField<String>(value: a.agama,
+                  DropdownButtonFormField<String>(initialValue: a.agama,
                     decoration: dropdownDeco('Pilih agama'),
                     items: kAgamaList.map((e) => DropdownMenuItem(value: e,
                         child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
@@ -238,7 +238,7 @@ class _KkPenggantiState extends State<FormulirKkPenggantiScreen> {
 
                   fieldLabel('Status Perkawinan', required: true),
                   const SizedBox(height: 6),
-                  DropdownButtonFormField<String>(value: a.statusKawin,
+                  DropdownButtonFormField<String>(initialValue: a.statusKawin,
                     decoration: dropdownDeco('Pilih status'),
                     items: kStatusPernikahanList.map((e) => DropdownMenuItem(value: e,
                         child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
@@ -248,7 +248,7 @@ class _KkPenggantiState extends State<FormulirKkPenggantiScreen> {
 
                   fieldLabel('Hubungan dalam Keluarga', required: true),
                   const SizedBox(height: 6),
-                  DropdownButtonFormField<String>(value: a.shdk,
+                  DropdownButtonFormField<String>(initialValue: a.shdk,
                     decoration: dropdownDeco('Pilih hubungan'),
                     items: kShdkList.map((e) => DropdownMenuItem(value: e,
                         child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),

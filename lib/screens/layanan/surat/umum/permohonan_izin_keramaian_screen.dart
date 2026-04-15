@@ -150,7 +150,7 @@ class _PermohonanIzinKeramaianScreenState
               fieldLabel('Hari', required: true),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
-                value: _hari,
+                initialValue: _hari,
                 decoration: dropdownDeco('Pilih hari'),
                 items: _hariList
                     .map((e) => DropdownMenuItem(

@@ -400,7 +400,7 @@ Widget buildTabelAnggota(List<AnggotaKK> anggota, StateSetter setState) {
           const SizedBox(height: 10),
           fieldLabel('Status Hubungan dalam Keluarga', required: true),
           const SizedBox(height: 6),
-          DropdownButtonFormField<String>(value: a.shdk,
+          DropdownButtonFormField<String>(initialValue: a.shdk,
             decoration: dropdownDeco('Pilih status hubungan'),
             items: kShdkList.map((e) => DropdownMenuItem(value: e,
                 child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),

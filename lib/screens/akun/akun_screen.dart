@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
-import '../auth/splash_screen.dart';
 import 'profil_screen.dart';
 
 class AkunScreen extends StatelessWidget {

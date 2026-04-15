@@ -130,7 +130,7 @@ class _F102State extends State<FormulirPendaftaranPeristiwaScreen> {
 
               fieldLabel('Kategori Permohonan', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(value: _kategori,
+              DropdownButtonFormField<String>(initialValue: _kategori,
                 decoration: dropdownDeco('Pilih kategori permohonan'),
                 items: _kategoriF102.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
@@ -148,8 +148,11 @@ class _F102State extends State<FormulirPendaftaranPeristiwaScreen> {
               ..._persyaratanF102.map((item) => CheckboxListTile(
                 value: _checkedPersyaratan.contains(item),
                 onChanged: (v) => setState(() {
-                  if (v == true) _checkedPersyaratan.add(item);
-                  else _checkedPersyaratan.remove(item);
+                  if (v == true) {
+                    _checkedPersyaratan.add(item);
+                  } else {
+                    _checkedPersyaratan.remove(item);
+                  }
                 }),
                 title: Text(item,
                     style: GoogleFonts.poppins(fontSize: 12, color: AppTheme.textPrimary)),

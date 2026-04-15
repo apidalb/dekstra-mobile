@@ -120,7 +120,7 @@ class _SuratPengantarSkckScreenState
               fieldLabel('Jenis Kelamin', required: true),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
-                value: _jenisKelamin,
+                initialValue: _jenisKelamin,
                 decoration: dropdownDeco('Pilih jenis kelamin'),
                 items: kJenisKelaminList
                     .map((e) => DropdownMenuItem(
@@ -136,7 +136,7 @@ class _SuratPengantarSkckScreenState
               fieldLabel('Agama', required: true),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
-                value: _agama,
+                initialValue: _agama,
                 decoration: dropdownDeco('Pilih agama'),
                 items: kAgamaList
                     .map((e) => DropdownMenuItem(
@@ -152,7 +152,7 @@ class _SuratPengantarSkckScreenState
               fieldLabel('Status Pernikahan', required: true),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
-                value: _status,
+                initialValue: _status,
                 decoration: dropdownDeco('Pilih status pernikahan'),
                 items: kStatusPernikahanList
                     .map((e) => DropdownMenuItem(

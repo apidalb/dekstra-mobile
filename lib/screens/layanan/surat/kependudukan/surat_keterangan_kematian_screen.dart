@@ -115,7 +115,7 @@ class _KematianState extends State<SuratKeteranganKematianScreen> {
 
               fieldLabel('Agama', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(value: _agama,
+              DropdownButtonFormField<String>(initialValue: _agama,
                 decoration: dropdownDeco('Pilih agama'),
                 items: kAgamaList.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
@@ -216,7 +216,7 @@ class _KematianState extends State<SuratKeteranganKematianScreen> {
 
               fieldLabel('Agama', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(value: _agamaPengaju,
+              DropdownButtonFormField<String>(initialValue: _agamaPengaju,
                 decoration: dropdownDeco('Pilih agama'),
                 items: kAgamaList.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),

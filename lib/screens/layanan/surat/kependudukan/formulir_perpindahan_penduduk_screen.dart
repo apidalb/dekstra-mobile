@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../theme/app_theme.dart';
 import '../form_surat_helpers.dart';
@@ -164,7 +163,7 @@ class _F103State extends State<FormulirPerpindahanPendudukScreen> {
 
               fieldLabel('Klarifikasi Kepindahan', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(value: _klarifikasi,
+              DropdownButtonFormField<String>(initialValue: _klarifikasi,
                 decoration: dropdownDeco('Pilih klarifikasi kepindahan'),
                 items: _klarifikasiList.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 12)))).toList(),
@@ -180,7 +179,7 @@ class _F103State extends State<FormulirPerpindahanPendudukScreen> {
 
               fieldLabel('Alasan Pindah', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(value: _alasan,
+              DropdownButtonFormField<String>(initialValue: _alasan,
                 decoration: dropdownDeco('Pilih alasan pindah'),
                 items: _alasanPindahList.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
@@ -231,7 +230,7 @@ class _F103State extends State<FormulirPerpindahanPendudukScreen> {
 
                     fieldLabel('SHDK', required: true),
                     const SizedBox(height: 6),
-                    DropdownButtonFormField<String>(value: a.shdk,
+                    DropdownButtonFormField<String>(initialValue: a.shdk,
                       decoration: dropdownDeco('Pilih status hubungan'),
                       items: kShdkList.map((e) => DropdownMenuItem(value: e,
                           child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),

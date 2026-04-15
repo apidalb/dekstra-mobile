@@ -193,12 +193,12 @@ class _LayananScreenState extends State<LayananScreen>
             child: TextField(
               onChanged: (v) => setState(() => _searchQuery = v),
               style: GoogleFonts.poppins(fontSize: 13),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Cari Surat...',
-                prefixIcon: const Icon(Icons.search,
+                prefixIcon: Icon(Icons.search,
                     size: 18, color: AppTheme.textSecondary),
                 contentPadding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                    EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                 isDense: true,
               ),
             ),

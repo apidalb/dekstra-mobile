@@ -118,7 +118,7 @@ class _SuratKeteranganLainnyaScreenState
               fieldLabel('Jenis Kelamin', required: true),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
-                value: _jenisKelamin,
+                initialValue: _jenisKelamin,
                 decoration: dropdownDeco('Pilih jenis kelamin'),
                 items: kJenisKelaminList
                     .map((e) => DropdownMenuItem(
@@ -134,7 +134,7 @@ class _SuratKeteranganLainnyaScreenState
               fieldLabel('Agama', required: true),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
-                value: _agama,
+                initialValue: _agama,
                 decoration: dropdownDeco('Pilih agama'),
                 items: kAgamaList
                     .map((e) => DropdownMenuItem(

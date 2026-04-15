@@ -131,7 +131,7 @@ class _SuratPengantarBarangScreenState
       fieldLabel('Jenis Kelamin', required: true),
       const SizedBox(height: 6),
       DropdownButtonFormField<String>(
-        value: jk,
+        initialValue: jk,
         decoration: dropdownDeco('Pilih jenis kelamin'),
         items: kJenisKelaminList
             .map((e) => DropdownMenuItem(
