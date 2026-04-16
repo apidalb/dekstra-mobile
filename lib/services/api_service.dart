@@ -370,8 +370,11 @@ class ApiService {
       Uri.parse('$kBaseUrl/pengajuan-surat/'),
       headers: await _jsonHeaders(auth: true),
     );
-    final list = jsonDecode(res.body) as List<dynamic>;
-    return list.cast<Map<String, dynamic>>();
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      final list = jsonDecode(res.body) as List<dynamic>;
+      return list.cast<Map<String, dynamic>>();
+    }
+    throw ApiException(res.statusCode, jsonDecode(res.body));
   }
 
   static Future<Map<String, dynamic>> submitPermohonan({

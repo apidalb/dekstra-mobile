@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
+import '../../services/api_service.dart';
 import 'home_screen.dart';
 
 // RiwayatScreen — menampilkan permohonan dengan status Disetujui atau Ditolak
@@ -12,24 +13,38 @@ class RiwayatScreen extends StatefulWidget {
 }
 
 class _RiwayatScreenState extends State<RiwayatScreen> {
-  // Riwayat = hanya status final (Disetujui / Ditolak)
   static const _riwayatStatuses = {'Disetujui', 'Ditolak'};
 
   String _searchQuery        = '';
-  String? _filterStatus;       // null = semua (dalam scope riwayat)
+  String? _filterStatus;
   String? _filterJenis;
   DateTime? _filterTanggalDari;
   DateTime? _filterTanggalHingga;
 
-  late List<Permohonan> _baseList;
+  List<Permohonan> _baseList = [];
+  bool _isLoading = true;
+  String? _errorMsg;
 
   @override
   void initState() {
     super.initState();
-    // Ambil hanya data yang berstatus final dari daftar global
-    _baseList = daftarPermohonan
-        .where((p) => _riwayatStatuses.contains(p.status))
-        .toList();
+    _loadRiwayat();
+  }
+
+  Future<void> _loadRiwayat() async {
+    setState(() { _isLoading = true; _errorMsg = null; });
+    try {
+      final data = await ApiService.getPermohonan();
+      final all  = data.map((j) => Permohonan.fromJson(j)).toList();
+      setState(() {
+        _baseList = all.where((p) => _riwayatStatuses.contains(p.status)).toList();
+        _isLoading = false;
+      });
+    } on ApiException catch (e) {
+      setState(() { _errorMsg = e.message; _isLoading = false; });
+    } catch (_) {
+      setState(() { _errorMsg = 'Gagal terhubung ke server'; _isLoading = false; });
+    }
   }
 
   bool get _hasActiveFilter =>
@@ -406,23 +421,48 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
             ),
           ),
 
-          // ── Info jumlah data ─────────────────────────────────────────
           // ── List riwayat ─────────────────────────────────────────────
           Expanded(
-            child: filtered.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.history, size: 48, color: AppTheme.border),
-                        const SizedBox(height: 12),
-                        Text('Belum ada riwayat permohonan',
-                            style: GoogleFonts.poppins(
-                                color: AppTheme.textSecondary, fontSize: 14)),
-                      ],
-                    ),
-                  )
-                : ListView.separated(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _errorMsg != null
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.cloud_off_outlined,
+                                size: 48, color: AppTheme.border),
+                            const SizedBox(height: 12),
+                            Text(_errorMsg!,
+                                style: GoogleFonts.poppins(
+                                    color: AppTheme.textSecondary, fontSize: 13),
+                                textAlign: TextAlign.center),
+                            const SizedBox(height: 12),
+                            TextButton.icon(
+                              onPressed: _loadRiwayat,
+                              icon: const Icon(Icons.refresh, size: 16),
+                              label: Text('Coba lagi',
+                                  style: GoogleFonts.poppins(fontSize: 13)),
+                            ),
+                          ],
+                        ),
+                      )
+                    : filtered.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.history,
+                                    size: 48, color: AppTheme.border),
+                                const SizedBox(height: 12),
+                                Text('Belum ada riwayat permohonan',
+                                    style: GoogleFonts.poppins(
+                                        color: AppTheme.textSecondary,
+                                        fontSize: 14)),
+                              ],
+                            ),
+                          )
+                        : ListView.separated(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                     itemCount: filtered.length + 1,
                     separatorBuilder: (_, i) => i < filtered.length - 1

@@ -40,12 +40,10 @@ const _muted  = Color(0xFFD1D5DB);
 
 int _statusIndex(String status) {
   switch (status) {
-    case 'Menunggu Verifikasi RT':    return 2;
-    case 'Menunggu Verifikasi RW':    return 3;
-    case 'Menunggu Verifikasi Admin': return 4;
+    case 'Menunggu Verifikasi': return 2;
     case 'Disetujui':
-    case 'Ditolak':                   return 5;
-    default:                          return 2;
+    case 'Ditolak':             return 5;
+    default:                    return 2;
   }
 }
 
@@ -63,9 +61,8 @@ List<_TimelineStep> _buildTimeline(Permohonan p) {
   final d    = p.tanggal;
   final isDitolak = p.status == 'Ditolak';
 
-  bool done(int step)    => idx > step;
-  bool current(int step) => idx == step;
-  bool active(int step)  => idx >= step;
+  bool done(int step)   => idx > step;
+  bool active(int step) => idx >= step;
 
   Color clr(int step, Color c) => active(step) ? c : _muted;
 
@@ -201,7 +198,9 @@ class PermohonanDetailScreen extends StatelessWidget {
                 const SizedBox(height: 2),
                 // ID
                 Text(
-                  '#${permohonan.id}',
+                  permohonan.nomorPermohonan.isNotEmpty
+                      ? '#${permohonan.nomorPermohonan}'
+                      : '#${permohonan.id}',
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     color: AppTheme.textSecondary,
@@ -415,23 +414,19 @@ class PermohonanDetailScreen extends StatelessWidget {
   // ── Status color helpers (mirrored from home_screen) ─────────────────────
   Color _statusBgColor(String s) {
     switch (s) {
-      case 'Menunggu Verifikasi RT':    return const Color(0xFFFEF3C7);
-      case 'Menunggu Verifikasi RW':    return const Color(0xFFDBEAFE);
-      case 'Menunggu Verifikasi Admin': return const Color(0xFFEDE9FE);
-      case 'Disetujui':                 return const Color(0xFFD1FAE5);
-      case 'Ditolak':                   return const Color(0xFFFFE4E6);
-      default:                          return AppTheme.primaryLight;
+      case 'Menunggu Verifikasi': return const Color(0xFFFEF3C7);
+      case 'Disetujui':           return const Color(0xFFD1FAE5);
+      case 'Ditolak':             return const Color(0xFFFFE4E6);
+      default:                    return AppTheme.primaryLight;
     }
   }
 
   Color _statusFgColor(String s) {
     switch (s) {
-      case 'Menunggu Verifikasi RT':    return const Color(0xFFD97706);
-      case 'Menunggu Verifikasi RW':    return const Color(0xFF2563EB);
-      case 'Menunggu Verifikasi Admin': return const Color(0xFF7C3AED);
-      case 'Disetujui':                 return const Color(0xFF059669);
-      case 'Ditolak':                   return const Color(0xFFE11D48);
-      default:                          return AppTheme.primary;
+      case 'Menunggu Verifikasi': return const Color(0xFFD97706);
+      case 'Disetujui':           return const Color(0xFF059669);
+      case 'Ditolak':             return const Color(0xFFE11D48);
+      default:                    return AppTheme.primary;
     }
   }
 }

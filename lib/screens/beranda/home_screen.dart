@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
+import '../../services/api_service.dart';
 import '../layanan/layanan_screen.dart';
 import '../akun/akun_screen.dart';
 import 'riwayat_screen.dart';
@@ -13,48 +14,43 @@ import 'notifikasi_screen.dart';
 
 class Permohonan {
   final int id;
+  final String nomorPermohonan;
   final String jenisSurat;
   final DateTime tanggal;
   final String status;
 
   const Permohonan({
     required this.id,
+    required this.nomorPermohonan,
     required this.jenisSurat,
     required this.tanggal,
     required this.status,
   });
 
+  factory Permohonan.fromJson(Map<String, dynamic> json) {
+    final statusInt = json['status'] as int;
+    final statusStr = switch (statusInt) {
+      1 => 'Menunggu Verifikasi',
+      2 => 'Ditolak',
+      3 => 'Disetujui',
+      _ => 'Tidak Diketahui',
+    };
+    final diajukanAt = json['diajukan_at'];
+    return Permohonan(
+      id: json['id'] as int,
+      nomorPermohonan: json['nomor_permohonan'] as String? ?? '',
+      jenisSurat: (json['jenis_surat'] as Map<String, dynamic>)['nama'] as String,
+      tanggal: diajukanAt != null ? DateTime.parse(diajukanAt as String) : DateTime.now(),
+      status: statusStr,
+    );
+  }
+
   String get tanggalFormatted =>
       '${tanggal.year}-${tanggal.month.toString().padLeft(2, '0')}-${tanggal.day.toString().padLeft(2, '0')}';
 }
 
-// Data dummy — sesuai tampilan web
-final List<Permohonan> daftarPermohonan = [
-  Permohonan(id: 1, jenisSurat: 'Surat Domisili',                         tanggal: DateTime(2026, 1, 1),  status: 'Menunggu Verifikasi RT'),
-  Permohonan(id: 2, jenisSurat: 'Surat Usaha',                            tanggal: DateTime(2026, 1, 4),  status: 'Menunggu Verifikasi RW'),
-  Permohonan(id: 3, jenisSurat: 'Surat Nikah',                            tanggal: DateTime(2026, 1, 9),  status: 'Menunggu Verifikasi Admin'),
-  Permohonan(id: 4, jenisSurat: 'Surat Pengantar Barang',                 tanggal: DateTime(2026, 1, 9),  status: 'Menunggu Verifikasi Admin'),
-  Permohonan(id: 5, jenisSurat: 'Surat Keterangan Tidak Mampu (Sekolah)', tanggal: DateTime(2026, 1, 9),  status: 'Menunggu Verifikasi Admin'),
-  Permohonan(id: 6, jenisSurat: 'Surat Pengantar Barang',                 tanggal: DateTime(2026, 1, 12), status: 'Menunggu Verifikasi Admin'),
-  Permohonan(id: 7, jenisSurat: 'Permohonan Izin Keramaian / Pesta',      tanggal: DateTime(2026, 1, 15), status: 'Disetujui'),
-  Permohonan(id: 8, jenisSurat: 'Formulir Kartu Keluarga (F-1.01)',       tanggal: DateTime(2026, 1, 15), status: 'Disetujui'),
-  Permohonan(id: 9, jenisSurat: 'Surat Domisili',                         tanggal: DateTime(2026, 1, 18), status: 'Ditolak'),
-];
-
-// Daftar jenis surat unik untuk dropdown filter
-List<String> get jenisSuratList {
-  final seen = <String>{};
-  return daftarPermohonan
-      .map((p) => p.jenisSurat)
-      .where((j) => seen.add(j))
-      .toList()
-    ..sort();
-}
-
 const List<String> allStatuses = [
-  'Menunggu Verifikasi RT',
-  'Menunggu Verifikasi RW',
-  'Menunggu Verifikasi Admin',
+  'Menunggu Verifikasi',
   'Disetujui',
   'Ditolak',
 ];
@@ -62,23 +58,19 @@ const List<String> allStatuses = [
 // ── Status helpers ─────────────────────────────────────────────────────────────
 Color statusBg(String s) {
   switch (s) {
-    case 'Menunggu Verifikasi RT':    return const Color(0xFFFEF3C7);
-    case 'Menunggu Verifikasi RW':    return const Color(0xFFDBEAFE);
-    case 'Menunggu Verifikasi Admin': return const Color(0xFFEDE9FE);
-    case 'Disetujui':                 return const Color(0xFFD1FAE5);
-    case 'Ditolak':                   return const Color(0xFFFFE4E6);
-    default:                          return AppTheme.primaryLight;
+    case 'Menunggu Verifikasi': return const Color(0xFFFEF3C7);
+    case 'Disetujui':           return const Color(0xFFD1FAE5);
+    case 'Ditolak':             return const Color(0xFFFFE4E6);
+    default:                    return AppTheme.primaryLight;
   }
 }
 
 Color statusColor(String s) {
   switch (s) {
-    case 'Menunggu Verifikasi RT':    return const Color(0xFFD97706);
-    case 'Menunggu Verifikasi RW':    return const Color(0xFF2563EB);
-    case 'Menunggu Verifikasi Admin': return const Color(0xFF7C3AED);
-    case 'Disetujui':                 return const Color(0xFF059669);
-    case 'Ditolak':                   return const Color(0xFFE11D48);
-    default:                          return AppTheme.primary;
+    case 'Menunggu Verifikasi': return const Color(0xFFD97706);
+    case 'Disetujui':           return const Color(0xFF059669);
+    case 'Ditolak':             return const Color(0xFFE11D48);
+    default:                    return AppTheme.primary;
   }
 }
 
@@ -205,13 +197,36 @@ class _BerandaTabState extends State<_BerandaTab> {
   DateTime? _filterTanggalDari;
   DateTime? _filterTanggalHingga;
 
-  // ── List permohonan yang bisa dimutasi (hapus) ─────────────────────────────
-  late List<Permohonan> _list;
+  // ── List permohonan aktif (status Menunggu Verifikasi) ───────────────────
+  List<Permohonan> _list = [];
+  bool _isLoading = true;
+  String? _errorMsg;
 
   @override
   void initState() {
     super.initState();
-    _list = List.from(daftarPermohonan);
+    _loadPermohonan();
+  }
+
+  Future<void> _loadPermohonan() async {
+    setState(() { _isLoading = true; _errorMsg = null; });
+    try {
+      final data = await ApiService.getPermohonan();
+      final all  = data.map((j) => Permohonan.fromJson(j)).toList();
+      setState(() {
+        _list = all.where((p) => p.status == 'Menunggu Verifikasi').toList();
+        _isLoading = false;
+      });
+    } on ApiException catch (e) {
+      setState(() { _errorMsg = e.message; _isLoading = false; });
+    } catch (_) {
+      setState(() { _errorMsg = 'Gagal terhubung ke server'; _isLoading = false; });
+    }
+  }
+
+  List<String> get _jenisSuratList {
+    final seen = <String>{};
+    return _list.map((p) => p.jenisSurat).where((j) => seen.add(j)).toList()..sort();
   }
 
   bool get _hasActiveFilter =>
@@ -381,7 +396,7 @@ class _BerandaTabState extends State<_BerandaTab> {
                   _filterDropdown(
                     value: tmpJenis,
                     hint: 'Semua',
-                    items: jenisSuratList,
+                    items: _jenisSuratList,
                     onChanged: (v) => setModal(() => tmpJenis = v),
                   ),
                   const SizedBox(height: 16),
@@ -541,40 +556,6 @@ class _BerandaTabState extends State<_BerandaTab> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // ── Hapus item ─────────────────────────────────────────────────────────────
-  void _hapusPermohonan(Permohonan item) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.4),
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Hapus Permohonan?',
-            style: GoogleFonts.poppins(
-                fontSize: 16, fontWeight: FontWeight.w700)),
-        content: Text(
-          'Permohonan "${item.jenisSurat}" akan dihapus permanen.',
-          style: GoogleFonts.poppins(fontSize: 13, color: AppTheme.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Batal',
-                style: GoogleFonts.poppins(color: AppTheme.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() => _list.remove(item));
-            },
-            child: Text('Hapus',
-                style: GoogleFonts.poppins(
-                    color: Colors.red, fontWeight: FontWeight.w600)),
-          ),
-        ],
       ),
     );
   }
@@ -819,21 +800,46 @@ class _BerandaTabState extends State<_BerandaTab> {
 
           // ── Daftar permohonan (info teks masuk dalam list) ──────────
           Expanded(
-            child: filtered.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.inbox_outlined,
-                            size: 48, color: AppTheme.border),
-                        const SizedBox(height: 12),
-                        Text('Tidak ada data',
-                            style: GoogleFonts.poppins(
-                                color: AppTheme.textSecondary, fontSize: 14)),
-                      ],
-                    ),
-                  )
-                : ListView.separated(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _errorMsg != null
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.cloud_off_outlined,
+                                size: 48, color: AppTheme.border),
+                            const SizedBox(height: 12),
+                            Text(_errorMsg!,
+                                style: GoogleFonts.poppins(
+                                    color: AppTheme.textSecondary, fontSize: 13),
+                                textAlign: TextAlign.center),
+                            const SizedBox(height: 12),
+                            TextButton.icon(
+                              onPressed: _loadPermohonan,
+                              icon: const Icon(Icons.refresh, size: 16),
+                              label: Text('Coba lagi',
+                                  style: GoogleFonts.poppins(fontSize: 13)),
+                            ),
+                          ],
+                        ),
+                      )
+                    : filtered.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.inbox_outlined,
+                                    size: 48, color: AppTheme.border),
+                                const SizedBox(height: 12),
+                                Text('Tidak ada permohonan aktif',
+                                    style: GoogleFonts.poppins(
+                                        color: AppTheme.textSecondary,
+                                        fontSize: 14)),
+                              ],
+                            ),
+                          )
+                        : ListView.separated(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                     itemCount: filtered.length + 1,
                     separatorBuilder: (_, i) => i < filtered.length - 1
