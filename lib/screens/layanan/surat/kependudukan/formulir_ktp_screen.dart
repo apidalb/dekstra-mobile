@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../theme/app_theme.dart';
 import '../form_surat_helpers.dart';
 
 const _jenisKtpList = [
@@ -18,8 +16,9 @@ class FormulirKtpScreen extends StatefulWidget {
 }
 
 class _KtpState extends State<FormulirKtpScreen> {
-  final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
+  final _fk1 = GlobalKey<FormState>();
+  final _fk2 = GlobalKey<FormState>();
+  final _fk3 = GlobalKey<FormState>();
 
   // Wilayah
   final _provCtrl  = TextEditingController();
@@ -48,134 +47,128 @@ class _KtpState extends State<FormulirKtpScreen> {
     super.dispose();
   }
 
-  void _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isLoading = false);
-    if (!mounted) return;
-    showSuccessDialog(context, 'Formulir Permohonan KTP');
-  }
+  Future<Map<String, dynamic>> _buildPayload() async => {
+    'provinsi'      : _provCtrl.text,
+    'kabupaten_kota': _kabCtrl.text,
+    'kecamatan'     : _kecCtrl.text,
+    'desa_kelurahan': _desaCtrl.text,
+    'jenis_ktp'     : _jenisKtp,
+    'nama_lengkap'  : _namaCtrl.text,
+    'nik'           : _nikCtrl.text,
+    'no_kk'         : _noKkCtrl.text,
+    'no_telepon'    : _noTelpCtrl.text,
+    'alamat'        : _alamatCtrl.text,
+    'rt'            : _rtCtrl.text,
+    'rw'            : _rwCtrl.text,
+    'kode_pos'      : _kodeCtrl.text,
+  };
+
+  Widget _buildDataWilayahStep() => Form(
+    key: _fk1,
+    child: Column(children: [
+      buildDataWilayah(provinsi: _provCtrl, kabKota: _kabCtrl,
+          kecamatan: _kecCtrl, desa: _desaCtrl),
+    ]),
+  );
+
+  Widget _buildJenisKtp() => Form(
+    key: _fk2,
+    child: Column(children: [
+      sectionCard(children: [
+        sectionHeader('Jenis Permohonan KTP'),
+        const SizedBox(height: 16),
+        fieldLabel('Permohonan KTP', required: true),
+        const SizedBox(height: 6),
+        DropdownButtonFormField<String>(initialValue: _jenisKtp,
+          decoration: dropdownDeco('Pilih jenis permohonan KTP'),
+          items: _jenisKtpList.map((e) => DropdownMenuItem(value: e,
+              child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
+          onChanged: (v) => setState(() => _jenisKtp = v),
+          validator: (v) => v == null ? 'Jenis permohonan wajib dipilih' : null),
+      ]),
+    ]),
+  );
+
+  Widget _buildDataPemohon() => Form(
+    key: _fk3,
+    child: Column(children: [
+      sectionCard(children: [
+        sectionHeader('Data Pemohon'),
+        const SizedBox(height: 16),
+        fieldLabel('Nama Lengkap', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _namaCtrl, style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan nama lengkap'),
+          validator: (v) => validateRequired(v, 'Nama')),
+        const SizedBox(height: 14),
+        fieldLabel('NIK', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _nikCtrl,
+          keyboardType: TextInputType.number, inputFormatters: nikFormatters,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan 16 digit NIK'),
+          validator: validateNIK),
+        const SizedBox(height: 14),
+        fieldLabel('No. KK', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _noKkCtrl,
+          keyboardType: TextInputType.number, inputFormatters: nikFormatters,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan 16 digit Nomor KK'),
+          validator: (v) {
+            if (v == null || v.isEmpty) return 'No. KK wajib diisi';
+            if (v.length != 16) return 'No. KK harus 16 digit';
+            return null;
+          }),
+        const SizedBox(height: 14),
+        fieldLabel('No. Telepon', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _noTelpCtrl, keyboardType: TextInputType.phone,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Contoh: 081234567890'),
+          validator: validatePhone),
+        const SizedBox(height: 14),
+        fieldLabel('Alamat Pemohon', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _alamatCtrl, maxLines: 2,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan alamat pemohon'),
+          validator: (v) => validateRequired(v, 'Alamat')),
+        const SizedBox(height: 14),
+        fieldLabel('RT', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _rtCtrl, keyboardType: TextInputType.number,
+          inputFormatters: angkaFormatters, style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Contoh: 001'),
+          validator: (v) => validateRequired(v, 'RT')),
+        const SizedBox(height: 14),
+        fieldLabel('RW', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _rwCtrl, keyboardType: TextInputType.number,
+          inputFormatters: angkaFormatters, style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Contoh: 002'),
+          validator: (v) => validateRequired(v, 'RW')),
+        const SizedBox(height: 14),
+        fieldLabel('Kode Pos', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _kodeCtrl, keyboardType: TextInputType.number,
+          inputFormatters: kodePosFormatters,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Contoh: 50271'),
+          validator: (v) => validateRequired(v, 'Kode Pos')),
+      ]),
+    ]),
+  );
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        title: const Text('Formulir Permohonan KTP'),
-        leading: IconButton(icon: const Icon(Icons.arrow_back_ios, size: 18),
-            onPressed: () => Navigator.pop(context)),
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-          children: [
-            namaSuratCard('FORMULIR PERMOHONAN KTP (F-1.21)'),
-            const SizedBox(height: 16),
-
-            buildDataWilayah(provinsi: _provCtrl, kabKota: _kabCtrl,
-                kecamatan: _kecCtrl, desa: _desaCtrl),
-            const SizedBox(height: 16),
-
-            // ── Jenis Permohonan ─────────────────────────────────────
-            sectionCard(children: [
-              sectionHeader('Jenis Permohonan KTP'),
-              const SizedBox(height: 16),
-
-              fieldLabel('Permohonan KTP', required: true),
-              const SizedBox(height: 6),
-              DropdownButtonFormField<String>(initialValue: _jenisKtp,
-                decoration: dropdownDeco('Pilih jenis permohonan KTP'),
-                items: _jenisKtpList.map((e) => DropdownMenuItem(value: e,
-                    child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
-                onChanged: (v) => setState(() => _jenisKtp = v),
-                validator: (v) => v == null ? 'Jenis permohonan wajib dipilih' : null),
-            ]),
-            const SizedBox(height: 16),
-
-            // ── Data Pemohon ─────────────────────────────────────────
-            sectionCard(children: [
-              sectionHeader('Data Pemohon'),
-              const SizedBox(height: 16),
-
-              fieldLabel('Nama Lengkap', required: true),
-              const SizedBox(height: 6),
-              TextFormField(controller: _namaCtrl, style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Masukkan nama lengkap'),
-                validator: (v) => validateRequired(v, 'Nama')),
-              const SizedBox(height: 14),
-
-              fieldLabel('NIK', required: true),
-              const SizedBox(height: 6),
-              TextFormField(controller: _nikCtrl,
-                keyboardType: TextInputType.number, inputFormatters: nikFormatters,
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Masukkan 16 digit NIK'),
-                validator: validateNIK),
-              const SizedBox(height: 14),
-
-              fieldLabel('No. KK', required: true),
-              const SizedBox(height: 6),
-              TextFormField(controller: _noKkCtrl,
-                keyboardType: TextInputType.number, inputFormatters: nikFormatters,
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Masukkan 16 digit Nomor KK'),
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'No. KK wajib diisi';
-                  if (v.length != 16) return 'No. KK harus 16 digit';
-                  return null;
-                }),
-              const SizedBox(height: 14),
-
-              fieldLabel('No. Telepon', required: true),
-              const SizedBox(height: 6),
-              TextFormField(controller: _noTelpCtrl, keyboardType: TextInputType.phone,
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Contoh: 081234567890'),
-                validator: validatePhone),
-              const SizedBox(height: 14),
-
-              fieldLabel('Alamat Pemohon', required: true),
-              const SizedBox(height: 6),
-              TextFormField(controller: _alamatCtrl, maxLines: 2,
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Masukkan alamat pemohon'),
-                validator: (v) => validateRequired(v, 'Alamat')),
-              const SizedBox(height: 14),
-
-              fieldLabel('RT', required: true),
-              const SizedBox(height: 6),
-              TextFormField(controller: _rtCtrl, keyboardType: TextInputType.number,
-                inputFormatters: angkaFormatters, style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Contoh: 001'),
-                validator: (v) => validateRequired(v, 'RT')),
-              const SizedBox(height: 14),
-
-              fieldLabel('RW', required: true),
-              const SizedBox(height: 6),
-              TextFormField(controller: _rwCtrl, keyboardType: TextInputType.number,
-                inputFormatters: angkaFormatters, style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Contoh: 002'),
-                validator: (v) => validateRequired(v, 'RW')),
-              const SizedBox(height: 14),
-
-              fieldLabel('Kode Pos', required: true),
-              const SizedBox(height: 6),
-              TextFormField(controller: _kodeCtrl, keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(5)],
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Contoh: 50271'),
-                validator: (v) => validateRequired(v, 'Kode Pos')),
-            ]),
-            const SizedBox(height: 24),
-
-            bottomButtons(onBack: () => Navigator.pop(context),
-                onSubmit: _submit, isLoading: _isLoading),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => SuratStepperPage(
+    appBarTitle: 'Formulir Permohonan KTP',
+    dataSteps: [
+      SuratDataStep(title: 'Data Wilayah',    formKey: _fk1, content: _buildDataWilayahStep()),
+      SuratDataStep(title: 'Jenis KTP',       formKey: _fk2, content: _buildJenisKtp()),
+      SuratDataStep(title: 'Data Pemohon',    formKey: _fk3, content: _buildDataPemohon()),
+    ],
+    jenisSurat: 'B05',
+    onBuildPayload: _buildPayload,
+  );
 }

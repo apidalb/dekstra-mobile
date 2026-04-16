@@ -1,189 +1,141 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../theme/app_theme.dart';
 import '../form_surat_helpers.dart';
 
 class SuratKeteranganTempatUsahaScreen extends StatefulWidget {
   const SuratKeteranganTempatUsahaScreen({super.key});
-
   @override
-  State<SuratKeteranganTempatUsahaScreen> createState() =>
-      _SuratKeteranganTempatUsahaScreenState();
+  State<SuratKeteranganTempatUsahaScreen> createState() => _SKTempatUsahaState();
 }
 
-class _SuratKeteranganTempatUsahaScreenState
-    extends State<SuratKeteranganTempatUsahaScreen> {
-  final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
+class _SKTempatUsahaState extends State<SuratKeteranganTempatUsahaScreen> {
+  final _fk1 = GlobalKey<FormState>();
+  final _fk2 = GlobalKey<FormState>();
+
+  // Data Pemohon
+  final _namaCtrl   = TextEditingController();
+  final _nikCtrl    = TextEditingController();
+  final _nibCtrl    = TextEditingController();
+  final _npwpCtrl   = TextEditingController();
+  final _alamatCtrl = TextEditingController();
 
   // Data Usaha
   final _namaUsahaCtrl   = TextEditingController();
   final _jenisUsahaCtrl  = TextEditingController();
   final _alamatUsahaCtrl = TextEditingController();
-  final _nibCtrl         = TextEditingController();
-  final _npwpCtrl        = TextEditingController();
-
-  // Data Pemilik
-  final _namaCtrl  = TextEditingController();
-  final _nikCtrl   = TextEditingController();
-  final _alamatCtrl = TextEditingController();
-
-  // Tujuan
-  final _tujuanCtrl = TextEditingController();
+  final _tujuanCtrl      = TextEditingController();
 
   @override
   void dispose() {
-    _namaUsahaCtrl.dispose(); _jenisUsahaCtrl.dispose();
-    _alamatUsahaCtrl.dispose(); _nibCtrl.dispose(); _npwpCtrl.dispose();
-    _namaCtrl.dispose(); _nikCtrl.dispose(); _alamatCtrl.dispose();
-    _tujuanCtrl.dispose();
+    for (final c in [_namaCtrl, _nikCtrl, _nibCtrl, _npwpCtrl, _alamatCtrl,
+      _namaUsahaCtrl, _jenisUsahaCtrl, _alamatUsahaCtrl, _tujuanCtrl]) { c.dispose(); }
     super.dispose();
   }
 
-  void _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isLoading = false);
-    if (!mounted) return;
-    showSuccessDialog(context, 'Surat Keterangan Tempat Usaha');
-  }
+  Future<Map<String, dynamic>> _buildPayload() async => {
+    'nama'          : _namaCtrl.text,
+    'nik'           : _nikCtrl.text,
+    'nib'           : _nibCtrl.text,
+    'npwp'          : _npwpCtrl.text,
+    'alamat_pemohon': _alamatCtrl.text,
+    'nama_usaha'    : _namaUsahaCtrl.text,
+    'jenis_usaha'   : _jenisUsahaCtrl.text,
+    'alamat_usaha'  : _alamatUsahaCtrl.text,
+    'tujuan'        : _tujuanCtrl.text,
+  };
+
+  Widget _buildDataPemohon() => Form(
+    key: _fk1,
+    child: Column(children: [
+      sectionCard(children: [
+        sectionHeader('Data Pemohon'),
+        const SizedBox(height: 16),
+        fieldLabel('NIK', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _nikCtrl,
+          keyboardType: TextInputType.number, inputFormatters: nikFormatters,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan 16 digit NIK'),
+          validator: validateNIK),
+        const SizedBox(height: 14),
+        fieldLabel('Nama Lengkap', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _namaCtrl,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan nama lengkap'),
+          validator: (v) => validateRequired(v, 'Nama lengkap')),
+        const SizedBox(height: 14),
+        fieldLabel('NIB (Nomor Induk Berusaha)', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _nibCtrl,
+          keyboardType: TextInputType.number,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan NIB'),
+          validator: (v) => validateRequired(v, 'NIB')),
+        const SizedBox(height: 14),
+        fieldLabel('NPWP', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _npwpCtrl,
+          keyboardType: TextInputType.number,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan NPWP'),
+          validator: (v) => validateRequired(v, 'NPWP')),
+        const SizedBox(height: 14),
+        fieldLabel('Alamat', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _alamatCtrl, maxLines: 3,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan alamat'),
+          validator: (v) => validateRequired(v, 'Alamat')),
+      ]),
+    ]),
+  );
+
+  Widget _buildDataUsaha() => Form(
+    key: _fk2,
+    child: Column(children: [
+      sectionCard(children: [
+        sectionHeader('Data Usaha'),
+        const SizedBox(height: 16),
+        fieldLabel('Nama Usaha', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _namaUsahaCtrl,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan nama usaha'),
+          validator: (v) => validateRequired(v, 'Nama usaha')),
+        const SizedBox(height: 14),
+        fieldLabel('Jenis Usaha', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _jenisUsahaCtrl,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Contoh: Perdagangan, Jasa, Industri'),
+          validator: (v) => validateRequired(v, 'Jenis usaha')),
+        const SizedBox(height: 14),
+        fieldLabel('Alamat Usaha', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _alamatUsahaCtrl, maxLines: 3,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan alamat usaha'),
+          validator: (v) => validateRequired(v, 'Alamat usaha')),
+        const SizedBox(height: 14),
+        fieldLabel('Tujuan Pengajuan', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _tujuanCtrl, maxLines: 3,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan tujuan pengajuan'),
+          validator: (v) => validateRequired(v, 'Tujuan pengajuan')),
+      ]),
+    ]),
+  );
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        title: const Text('Surat Ket. Tempat Usaha'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, size: 18),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-          children: [
-            namaSuratCard('SURAT KETERANGAN TEMPAT USAHA'),
-            const SizedBox(height: 16),
-
-            // ── Data Usaha ───────────────────────────────────────────
-            sectionCard(children: [
-              sectionHeader('Data Usaha'),
-              const SizedBox(height: 16),
-
-              fieldLabel('Nama Usaha', required: true),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _namaUsahaCtrl,
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Masukkan nama usaha'),
-                validator: (v) => validateRequired(v, 'Nama usaha'),
-              ),
-              const SizedBox(height: 14),
-
-              fieldLabel('Jenis Usaha', required: true),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _jenisUsahaCtrl,
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(
-                    hintText: 'Contoh: Perdagangan, Jasa, Pertanian'),
-                validator: (v) => validateRequired(v, 'Jenis usaha'),
-              ),
-              const SizedBox(height: 14),
-
-              fieldLabel('Alamat Usaha', required: true),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _alamatUsahaCtrl,
-                maxLines: 3,
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Masukkan alamat usaha'),
-                validator: (v) => validateRequired(v, 'Alamat usaha'),
-              ),
-              const SizedBox(height: 14),
-
-              fieldLabel('No. Induk Berusaha (NIB)'),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _nibCtrl,
-                keyboardType: TextInputType.number,
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Nomor NIB (opsional)'),
-              ),
-              const SizedBox(height: 14),
-
-              fieldLabel('NPWP'),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _npwpCtrl,
-                keyboardType: TextInputType.number,
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Nomor NPWP (opsional)'),
-              ),
-            ]),
-            const SizedBox(height: 16),
-
-            // ── Data Pemilik ─────────────────────────────────────────
-            sectionCard(children: [
-              sectionHeader('Data Pemilik'),
-              const SizedBox(height: 16),
-
-              fieldLabel('Nama Pemilik', required: true),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _namaCtrl,
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Masukkan nama pemilik'),
-                validator: (v) => validateRequired(v, 'Nama pemilik'),
-              ),
-              const SizedBox(height: 14),
-
-              fieldLabel('NIK', required: true),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _nikCtrl,
-                keyboardType: TextInputType.number,
-                inputFormatters: nikFormatters,
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Masukkan 16 digit NIK'),
-                validator: validateNIK,
-              ),
-              const SizedBox(height: 14),
-
-              fieldLabel('Alamat', required: true),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _alamatCtrl,
-                maxLines: 3,
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Masukkan alamat pemilik'),
-                validator: (v) => validateRequired(v, 'Alamat'),
-              ),
-              const SizedBox(height: 14),
-
-              fieldLabel('Tujuan Pengajuan', required: true),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _tujuanCtrl,
-                maxLines: 3,
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Masukkan tujuan pengajuan'),
-                validator: (v) => validateRequired(v, 'Tujuan pengajuan'),
-              ),
-            ]),
-            const SizedBox(height: 24),
-
-            bottomButtons(
-              onBack: () => Navigator.pop(context),
-              onSubmit: _submit,
-              isLoading: _isLoading,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => SuratStepperPage(
+    appBarTitle: 'Surat Ket. Tempat Usaha',
+    dataSteps: [
+      SuratDataStep(title: 'Data Pemohon', formKey: _fk1, content: _buildDataPemohon()),
+      SuratDataStep(title: 'Data Usaha',   formKey: _fk2, content: _buildDataUsaha()),
+    ],
+    jenisSurat: 'A02',
+    onBuildPayload: _buildPayload,
+  );
 }

@@ -381,8 +381,33 @@ class ApiService {
     final res = await http.post(
       Uri.parse('$kBaseUrl/pengajuan-surat/'),
       headers: await _jsonHeaders(auth: true),
-      body: jsonEncode({'jenis_surat': jenisSurat, ...data}),
+      body: jsonEncode({'jenis_surat': jenisSurat, 'data': data}),
     );
+    return _handleResponse(res);
+  }
+
+  /// Upload berkas pendukung ke permohonan yang sudah dibuat.
+  /// POST /upload/berkas-surat/  (multipart)
+  ///
+  /// [nomorPermohonan]  nomor permohonan dari response submitPermohonan
+  /// [file]             XFile dari image_picker
+  static Future<Map<String, dynamic>> uploadBerkasSurat({
+    required String nomorPermohonan,
+    required XFile file,
+  }) async {
+    final token = await getAccessToken();
+    final req = http.MultipartRequest(
+      'POST',
+      Uri.parse('$kBaseUrl/upload/berkas-surat/'),
+    );
+    if (token != null) req.headers['Authorization'] = 'Bearer $token';
+    req.fields['nomor_permohonan'] = nomorPermohonan;
+    final bytes = await file.readAsBytes();
+    req.files.add(
+      http.MultipartFile.fromBytes('file_berkas', bytes, filename: file.name),
+    );
+    final streamed = await req.send();
+    final res = await http.Response.fromStream(streamed);
     return _handleResponse(res);
   }
 }

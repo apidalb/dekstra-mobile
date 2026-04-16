@@ -11,11 +11,6 @@ const _klarifikasiList = [
   'Antar Provinsi',
 ];
 
-const _alasanPindahList = [
-  'Pekerjaan', 'Pendidikan', 'Keamanan', 'Kesehatan',
-  'Perumahan', 'Keluarga', 'Lainnya',
-];
-
 class _AnggotaF103 {
   final nikCtrl  = TextEditingController();
   final namaCtrl = TextEditingController();
@@ -33,13 +28,15 @@ class FormulirPerpindahanPendudukScreen extends StatefulWidget {
 }
 
 class _F103State extends State<FormulirPerpindahanPendudukScreen> {
-  final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
+  final _fk1 = GlobalKey<FormState>();
+  final _fk2 = GlobalKey<FormState>();
+  final _fk3 = GlobalKey<FormState>();
+  final _fk4 = GlobalKey<FormState>();
 
-  final _noKkCtrl    = TextEditingController();
-  final _namaCtrl    = TextEditingController();
-  final _nikCtrl     = TextEditingController();
-  final _noHpCtrl    = TextEditingController();
+  final _noKkCtrl  = TextEditingController();
+  final _namaCtrl  = TextEditingController();
+  final _nikCtrl   = TextEditingController();
+  final _noHpCtrl  = TextEditingController();
 
   // Alamat Asal
   final _alamatAsalCtrl = TextEditingController();
@@ -76,190 +73,198 @@ class _F103State extends State<FormulirPerpindahanPendudukScreen> {
     super.dispose();
   }
 
-  void _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isLoading = false);
-    if (!mounted) return;
-    showSuccessDialog(context, 'Formulir Pendaftaran Perpindahan Penduduk');
-  }
+  Future<Map<String, dynamic>> _buildPayload() async => {
+    'no_kk'          : _noKkCtrl.text,
+    'nama_pemohon'   : _namaCtrl.text,
+    'nik'            : _nikCtrl.text,
+    'no_hp'          : _noHpCtrl.text,
+    'alamat_asal'    : _alamatAsalCtrl.text,
+    'rt_asal'        : _rtAsalCtrl.text,
+    'rw_asal'        : _rwAsalCtrl.text,
+    'desa_asal'      : _desaAsalCtrl.text,
+    'kecamatan_asal' : _kecAsalCtrl.text,
+    'kabupaten_asal' : _kabAsalCtrl.text,
+    'provinsi_asal'  : _provAsalCtrl.text,
+    'kode_pos_asal'  : _kodeAsalCtrl.text,
+    'klarifikasi'    : _klarifikasi,
+    'alamat_tujuan'  : _alamatTujCtrl.text,
+    'rt_tujuan'      : _rtTujCtrl.text,
+    'rw_tujuan'      : _rwTujCtrl.text,
+    'desa_tujuan'    : _desaTujCtrl.text,
+    'kecamatan_tujuan': _kecTujCtrl.text,
+    'kabupaten_tujuan': _kabTujCtrl.text,
+    'provinsi_tujuan': _provTujCtrl.text,
+    'kode_pos_tujuan': _kodeTujCtrl.text,
+    'alasan_pindah'  : _alasan,
+    'anggota_pindah' : _anggota.map((a) => {
+      'nik' : a.nikCtrl.text,
+      'nama': a.namaCtrl.text,
+      'shdk': a.shdk,
+    }).toList(),
+  };
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        title: const Text('Formulir Perpindahan'),
-        leading: IconButton(icon: const Icon(Icons.arrow_back_ios, size: 18),
-            onPressed: () => Navigator.pop(context)),
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-          children: [
-            namaSuratCard('FORMULIR PENDAFTARAN PERPINDAHAN PENDUDUK (F-1.03)'),
-            const SizedBox(height: 16),
+  Widget _buildDataPemohon() => Form(
+    key: _fk1,
+    child: Column(children: [
+      sectionCard(children: [
+        sectionHeader('Data Pemohon'),
+        const SizedBox(height: 16),
+        fieldLabel('Nomor KK', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _noKkCtrl,
+          keyboardType: TextInputType.number, inputFormatters: nikFormatters,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan 16 digit No. KK'),
+          validator: (v) {
+            if (v == null || v.isEmpty) return 'No. KK wajib diisi';
+            if (v.length != 16) return 'No. KK harus 16 digit';
+            return null;
+          }),
+        const SizedBox(height: 14),
+        fieldLabel('Nama Lengkap Pemohon', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _namaCtrl, style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan nama lengkap'),
+          validator: (v) => validateRequired(v, 'Nama')),
+        const SizedBox(height: 14),
+        fieldLabel('NIK', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _nikCtrl,
+          keyboardType: TextInputType.number, inputFormatters: nikFormatters,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan 16 digit NIK'),
+          validator: validateNIK),
+        const SizedBox(height: 14),
+        fieldLabel('No. HP / WhatsApp', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _noHpCtrl, keyboardType: TextInputType.phone,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Contoh: 081234567890'),
+          validator: validatePhone),
+      ]),
+    ]),
+  );
 
-            // ── Data Pemohon ─────────────────────────────────────────
-            sectionCard(children: [
-              sectionHeader('Data Pemohon'),
-              const SizedBox(height: 16),
+  Widget _buildAlamatAsal() => Form(
+    key: _fk2,
+    child: Column(children: [
+      sectionCard(children: [
+        sectionHeader('Alamat Asal'),
+        const SizedBox(height: 16),
+        ...buildAlamatBlock(
+          alamat: _alamatAsalCtrl, rt: _rtAsalCtrl, rw: _rwAsalCtrl,
+          desa: _desaAsalCtrl, kec: _kecAsalCtrl, kab: _kabAsalCtrl,
+          prov: _provAsalCtrl, kodePos: _kodeAsalCtrl),
+      ]),
+    ]),
+  );
 
-              fieldLabel('Nomor KK', required: true),
-              const SizedBox(height: 6),
-              TextFormField(controller: _noKkCtrl,
-                keyboardType: TextInputType.number, inputFormatters: nikFormatters,
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Masukkan 16 digit No. KK'),
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'No. KK wajib diisi';
-                  if (v.length != 16) return 'No. KK harus 16 digit';
-                  return null;
-                }),
-              const SizedBox(height: 14),
+  Widget _buildAlamatTujuan() => Form(
+    key: _fk3,
+    child: Column(children: [
+      sectionCard(children: [
+        sectionHeader('Alamat Tujuan'),
+        const SizedBox(height: 16),
+        fieldLabel('Klarifikasi Kepindahan', required: true),
+        const SizedBox(height: 6),
+        DropdownButtonFormField<String>(initialValue: _klarifikasi,
+          decoration: dropdownDeco('Pilih klarifikasi kepindahan'),
+          items: _klarifikasiList.map((e) => DropdownMenuItem(value: e,
+              child: Text(e, style: GoogleFonts.poppins(fontSize: 12)))).toList(),
+          onChanged: (v) => setState(() => _klarifikasi = v),
+          validator: (v) => v == null ? 'Wajib dipilih' : null),
+        const SizedBox(height: 14),
+        ...buildAlamatBlock(
+          alamat: _alamatTujCtrl, rt: _rtTujCtrl, rw: _rwTujCtrl,
+          desa: _desaTujCtrl, kec: _kecTujCtrl, kab: _kabTujCtrl,
+          prov: _provTujCtrl, kodePos: _kodeTujCtrl),
+        const SizedBox(height: 14),
+        fieldLabel('Alasan Pindah', required: true),
+        const SizedBox(height: 6),
+        DropdownButtonFormField<String>(initialValue: _alasan,
+          decoration: dropdownDeco('Pilih alasan pindah'),
+          items: kAlasanPindahList.map((e) => DropdownMenuItem(value: e,
+              child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
+          onChanged: (v) => setState(() => _alasan = v),
+          validator: (v) => v == null ? 'Wajib dipilih' : null),
+      ]),
+    ]),
+  );
 
-              fieldLabel('Nama Lengkap Pemohon', required: true),
-              const SizedBox(height: 6),
-              TextFormField(controller: _namaCtrl, style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Masukkan nama lengkap'),
-                validator: (v) => validateRequired(v, 'Nama')),
-              const SizedBox(height: 14),
-
+  Widget _buildAnggota() => Form(
+    key: _fk4,
+    child: Column(children: [
+      sectionCard(children: [
+        sectionHeader('Daftar Anggota Keluarga yang Pindah'),
+        const SizedBox(height: 12),
+        ...List.generate(_anggota.length, (i) {
+          final a = _anggota[i];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Text('Anggota ${i + 1}',
+                    style: GoogleFonts.poppins(fontSize: 13,
+                        fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+                const Spacer(),
+                if (_anggota.length > 1)
+                  GestureDetector(
+                    onTap: () { a.dispose(); setState(() => _anggota.removeAt(i)); },
+                    child: Text('Hapus', style: GoogleFonts.poppins(
+                        fontSize: 12, color: Colors.red, fontWeight: FontWeight.w500)),
+                  ),
+              ]),
+              const SizedBox(height: 8),
               fieldLabel('NIK', required: true),
               const SizedBox(height: 6),
-              TextFormField(controller: _nikCtrl,
+              TextFormField(controller: a.nikCtrl,
                 keyboardType: TextInputType.number, inputFormatters: nikFormatters,
                 style: GoogleFonts.poppins(fontSize: 13),
                 decoration: const InputDecoration(hintText: 'Masukkan 16 digit NIK'),
                 validator: validateNIK),
-              const SizedBox(height: 14),
-
-              fieldLabel('No. HP / WhatsApp', required: true),
+              const SizedBox(height: 10),
+              fieldLabel('Nama Lengkap', required: true),
               const SizedBox(height: 6),
-              TextFormField(controller: _noHpCtrl, keyboardType: TextInputType.phone,
-                style: GoogleFonts.poppins(fontSize: 13),
-                decoration: const InputDecoration(hintText: 'Contoh: 081234567890'),
-                validator: validatePhone),
-            ]),
-            const SizedBox(height: 16),
-
-            // ── Alamat Asal ──────────────────────────────────────────
-            sectionCard(children: [
-              sectionHeader('Alamat Asal'),
-              const SizedBox(height: 16),
-              ...buildAlamatBlock(
-                alamat: _alamatAsalCtrl, rt: _rtAsalCtrl, rw: _rwAsalCtrl,
-                desa: _desaAsalCtrl, kec: _kecAsalCtrl, kab: _kabAsalCtrl,
-                prov: _provAsalCtrl, kodePos: _kodeAsalCtrl),
-            ]),
-            const SizedBox(height: 16),
-
-            // ── Alamat Tujuan ────────────────────────────────────────
-            sectionCard(children: [
-              sectionHeader('Alamat Tujuan'),
-              const SizedBox(height: 16),
-
-              fieldLabel('Klarifikasi Kepindahan', required: true),
+              TextFormField(controller: a.namaCtrl, style: GoogleFonts.poppins(fontSize: 13),
+                decoration: const InputDecoration(hintText: 'Masukkan nama lengkap'),
+                validator: (v) => validateRequired(v, 'Nama')),
+              const SizedBox(height: 10),
+              fieldLabel('SHDK', required: true),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(initialValue: _klarifikasi,
-                decoration: dropdownDeco('Pilih klarifikasi kepindahan'),
-                items: _klarifikasiList.map((e) => DropdownMenuItem(value: e,
-                    child: Text(e, style: GoogleFonts.poppins(fontSize: 12)))).toList(),
-                onChanged: (v) => setState(() => _klarifikasi = v),
-                validator: (v) => v == null ? 'Wajib dipilih' : null),
-              const SizedBox(height: 14),
-
-              ...buildAlamatBlock(
-                alamat: _alamatTujCtrl, rt: _rtTujCtrl, rw: _rwTujCtrl,
-                desa: _desaTujCtrl, kec: _kecTujCtrl, kab: _kabTujCtrl,
-                prov: _provTujCtrl, kodePos: _kodeTujCtrl),
-              const SizedBox(height: 14),
-
-              fieldLabel('Alasan Pindah', required: true),
-              const SizedBox(height: 6),
-              DropdownButtonFormField<String>(initialValue: _alasan,
-                decoration: dropdownDeco('Pilih alasan pindah'),
-                items: _alasanPindahList.map((e) => DropdownMenuItem(value: e,
+              DropdownButtonFormField<String>(initialValue: a.shdk,
+                decoration: dropdownDeco('Pilih status hubungan'),
+                items: kShdkList.map((e) => DropdownMenuItem(value: e,
                     child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
-                onChanged: (v) => setState(() => _alasan = v),
-                validator: (v) => v == null ? 'Wajib dipilih' : null),
+                onChanged: (v) => setState(() => a.shdk = v),
+                validator: (v) => v == null ? 'SHDK wajib dipilih' : null),
+              if (i < _anggota.length - 1)
+                const Padding(
+                  padding: EdgeInsets.only(top: 14),
+                  child: Divider(height: 1, color: AppTheme.border),
+                ),
             ]),
-            const SizedBox(height: 16),
-
-            // ── Anggota Keluarga yang Pindah ─────────────────────────
-            sectionCard(children: [
-              sectionHeader('Daftar Anggota Keluarga yang Pindah'),
-              const SizedBox(height: 12),
-
-              ...List.generate(_anggota.length, (i) {
-                final a = _anggota[i];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Row(children: [
-                      Text('Anggota ${i + 1}',
-                          style: GoogleFonts.poppins(fontSize: 13,
-                              fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
-                      const Spacer(),
-                      if (_anggota.length > 1)
-                        GestureDetector(
-                          onTap: () { a.dispose(); setState(() => _anggota.removeAt(i)); },
-                          child: Text('Hapus', style: GoogleFonts.poppins(
-                              fontSize: 12, color: Colors.red, fontWeight: FontWeight.w500)),
-                        ),
-                    ]),
-                    const SizedBox(height: 8),
-
-                    fieldLabel('NIK', required: true),
-                    const SizedBox(height: 6),
-                    TextFormField(controller: a.nikCtrl,
-                      keyboardType: TextInputType.number, inputFormatters: nikFormatters,
-                      style: GoogleFonts.poppins(fontSize: 13),
-                      decoration: const InputDecoration(hintText: 'Masukkan 16 digit NIK'),
-                      validator: validateNIK),
-                    const SizedBox(height: 10),
-
-                    fieldLabel('Nama Lengkap', required: true),
-                    const SizedBox(height: 6),
-                    TextFormField(controller: a.namaCtrl, style: GoogleFonts.poppins(fontSize: 13),
-                      decoration: const InputDecoration(hintText: 'Masukkan nama lengkap'),
-                      validator: (v) => validateRequired(v, 'Nama')),
-                    const SizedBox(height: 10),
-
-                    fieldLabel('SHDK', required: true),
-                    const SizedBox(height: 6),
-                    DropdownButtonFormField<String>(initialValue: a.shdk,
-                      decoration: dropdownDeco('Pilih status hubungan'),
-                      items: kShdkList.map((e) => DropdownMenuItem(value: e,
-                          child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
-                      onChanged: (v) => setState(() => a.shdk = v),
-                      validator: (v) => v == null ? 'SHDK wajib dipilih' : null),
-
-                    if (i < _anggota.length - 1)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 14),
-                        child: Divider(height: 1, color: AppTheme.border),
-                      ),
-                  ]),
-                );
-              }),
-
-              TextButton.icon(
-                onPressed: () => setState(() => _anggota.add(_AnggotaF103())),
-                icon: const Icon(Icons.add, size: 16),
-                label: Text('Tambah Anggota',
-                    style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500)),
-              ),
-            ]),
-            const SizedBox(height: 24),
-
-            bottomButtons(onBack: () => Navigator.pop(context),
-                onSubmit: _submit, isLoading: _isLoading),
-          ],
+          );
+        }),
+        TextButton.icon(
+          onPressed: () => setState(() => _anggota.add(_AnggotaF103())),
+          icon: const Icon(Icons.add, size: 16),
+          label: Text('Tambah Anggota',
+              style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500)),
         ),
-      ),
-    );
-  }
+      ]),
+    ]),
+  );
+
+  @override
+  Widget build(BuildContext context) => SuratStepperPage(
+    appBarTitle: 'Formulir Perpindahan',
+    dataSteps: [
+      SuratDataStep(title: 'Data Pemohon',  formKey: _fk1, content: _buildDataPemohon()),
+      SuratDataStep(title: 'Alamat Asal',   formKey: _fk2, content: _buildAlamatAsal()),
+      SuratDataStep(title: 'Alamat Tujuan', formKey: _fk3, content: _buildAlamatTujuan()),
+      SuratDataStep(title: 'Anggota',       formKey: _fk4, content: _buildAnggota()),
+    ],
+    jenisSurat: 'B09',
+    onBuildPayload: _buildPayload,
+  );
 }
