@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
 import '../../services/api_service.dart';
-import '../auth/login_screen.dart';
+import '../auth/splash_screen.dart';
 import 'profil_screen.dart';
 
 class AkunScreen extends StatelessWidget {
@@ -203,7 +203,7 @@ class AkunScreen extends StatelessWidget {
               if (!context.mounted) return;
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                MaterialPageRoute(builder: (_) => const SplashScreen()),
                 (route) => false,
               );
             },
