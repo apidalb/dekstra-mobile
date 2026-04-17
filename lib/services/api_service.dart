@@ -457,4 +457,32 @@ class ApiService {
     final res = await http.Response.fromStream(streamed);
     return _handleResponse(res);
   }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // Notifikasi
+  // ════════════════════════════════════════════════════════════════════════
+
+  /// Daftar notifikasi milik user yang sedang login
+  /// GET /notifikasi/
+  static Future<List<Map<String, dynamic>>> getNotifikasi() async {
+    final res = await http.get(
+      Uri.parse('$kBaseUrl/notifikasi/'),
+      headers: await _jsonHeaders(auth: true),
+    );
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      final list = jsonDecode(res.body) as List<dynamic>;
+      return list.cast<Map<String, dynamic>>();
+    }
+    throw ApiException(res.statusCode, jsonDecode(res.body));
+  }
+
+  /// Tandai notifikasi sebagai sudah dibaca
+  /// POST /notifikasi/{id}/read/
+  static Future<void> markNotifikasiRead(int id) async {
+    final res = await http.post(
+      Uri.parse('$kBaseUrl/notifikasi/$id/read/'),
+      headers: await _jsonHeaders(auth: true),
+    );
+    _handleResponse(res);
+  }
 }

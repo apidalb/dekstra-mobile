@@ -74,25 +74,6 @@ Color statusColor(String s) {
   }
 }
 
-// ── Notifikasi ─────────────────────────────────────────────────────────────────
-class _Notifikasi {
-  final String judul;
-  final String pesan;
-  final String waktu;
-  final bool dibaca;
-  const _Notifikasi({
-    required this.judul,
-    required this.pesan,
-    required this.waktu,
-    this.dibaca = false,
-  });
-}
-
-const List<_Notifikasi> _daftarNotifikasi = [
-  _Notifikasi(judul: 'Pengajuan Surat Berhasil',  pesan: 'Pengajuan Surat Keterangan Usaha berhasil dikirim',  waktu: '2 menit lalu'),
-  _Notifikasi(judul: 'Surat Diverifikasi RT',     pesan: 'Pengajuan diteruskan ke RW',                        waktu: '10 menit lalu'),
-  _Notifikasi(judul: 'Surat Diverifikasi RW',     pesan: 'Pengajuan diteruskan ke Kepala Desa',               waktu: '1 jam lalu',  dibaca: true),
-];
 
 // ══════════════════════════════════════════════════════════════════════════════
 // HomeScreen
@@ -214,10 +195,25 @@ class _BerandaTabState extends State<_BerandaTab> {
   bool _isLoading = true;
   String? _errorMsg;
 
+  // ── Notifikasi ────────────────────────────────────────────────────────────
+  List<NotifikasiModel> _notifList = [];
+
   @override
   void initState() {
     super.initState();
     _loadPermohonan();
+    _loadNotifikasi();
+  }
+
+  Future<void> _loadNotifikasi() async {
+    try {
+      final data = await ApiService.getNotifikasi();
+      if (mounted) {
+        setState(() {
+          _notifList = data.map((j) => NotifikasiModel.fromJson(j)).toList();
+        });
+      }
+    } catch (_) {}
   }
 
   Future<void> _loadPermohonan() async {
@@ -301,7 +297,11 @@ class _BerandaTabState extends State<_BerandaTab> {
             child: Material(
               elevation: 8,
               borderRadius: BorderRadius.circular(14),
-              child: _NotifPanel(onClose: _closeNotif),
+              child: _NotifPanel(
+                initialItems: List.from(_notifList),
+                onClose: _closeNotif,
+                onMarkReadDone: _loadNotifikasi,
+              ),
             ),
           ),
         ],
@@ -588,7 +588,7 @@ class _BerandaTabState extends State<_BerandaTab> {
 
   @override
   Widget build(BuildContext context) {
-    final unread  = _daftarNotifikasi.where((n) => !n.dibaca).length;
+    final unread  = _notifList.where((n) => !n.sudahDibaca).length;
     final filtered = _filtered;
 
     return SafeArea(
@@ -1019,11 +1019,40 @@ class PermohonanCard extends StatelessWidget {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// Panel Notifikasi
+// Panel Notifikasi (dropdown overlay dari bell icon)
 // ══════════════════════════════════════════════════════════════════════════════
-class _NotifPanel extends StatelessWidget {
+class _NotifPanel extends StatefulWidget {
+  final List<NotifikasiModel> initialItems;
   final VoidCallback onClose;
-  const _NotifPanel({required this.onClose});
+  final VoidCallback onMarkReadDone;
+
+  const _NotifPanel({
+    required this.initialItems,
+    required this.onClose,
+    required this.onMarkReadDone,
+  });
+
+  @override
+  State<_NotifPanel> createState() => _NotifPanelState();
+}
+
+class _NotifPanelState extends State<_NotifPanel> {
+  late List<NotifikasiModel> _items;
+
+  @override
+  void initState() {
+    super.initState();
+    _items = List.from(widget.initialItems);
+  }
+
+  Future<void> _markRead(NotifikasiModel notif) async {
+    if (notif.sudahDibaca) return;
+    try {
+      await ApiService.markNotifikasiRead(notif.id);
+      if (mounted) setState(() => notif.sudahDibaca = true);
+      widget.onMarkReadDone();
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1050,7 +1079,7 @@ class _NotifPanel extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.close,
                       color: AppTheme.textSecondary, size: 18),
-                  onPressed: onClose,
+                  onPressed: widget.onClose,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),
@@ -1058,24 +1087,33 @@ class _NotifPanel extends StatelessWidget {
             ),
           ),
           const Divider(height: 1, color: AppTheme.border),
-          Flexible(
-            child: ListView.separated(
-              shrinkWrap: true,
-              padding: EdgeInsets.zero,
-              itemCount: _daftarNotifikasi.length,
-              separatorBuilder: (_, __) =>
-                  const Divider(height: 1, color: AppTheme.border),
-              itemBuilder: (_, i) => _NotifItem(notif: _daftarNotifikasi[i]),
-            ),
-          ),
+          _items.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Text('Tidak ada notifikasi',
+                      style: GoogleFonts.poppins(
+                          fontSize: 13, color: AppTheme.textSecondary)),
+                )
+              : Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    itemCount: _items.length,
+                    separatorBuilder: (_, __) =>
+                        const Divider(height: 1, color: AppTheme.border),
+                    itemBuilder: (_, i) => _NotifItem(
+                      notif: _items[i],
+                      onTap: () => _markRead(_items[i]),
+                    ),
+                  ),
+                ),
           const Divider(height: 1, color: AppTheme.border),
           InkWell(
             onTap: () {
-              onClose();
+              widget.onClose();
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (_) => const NotifikasiScreen()),
+                MaterialPageRoute(builder: (_) => const NotifikasiScreen()),
               );
             },
             child: Container(
@@ -1097,50 +1135,60 @@ class _NotifPanel extends StatelessWidget {
 }
 
 class _NotifItem extends StatelessWidget {
-  final _Notifikasi notif;
-  const _NotifItem({required this.notif});
+  final NotifikasiModel notif;
+  final VoidCallback onTap;
+
+  const _NotifItem({required this.notif, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final bgColor   = notif.dibaca ? Colors.transparent : const Color(0xFFECF7F5);
-    final iconBg    = notif.dibaca ? const Color(0xFFEEEEEE) : AppTheme.primaryLight;
-    final iconColor = notif.dibaca ? AppTheme.textSecondary : AppTheme.primary;
+    final iconBg    = notifIconBg(notif.tipe, notif.sudahDibaca);
+    final iconColor = notifIconColor(notif.tipe, notif.sudahDibaca);
+    final iconData  = notifIcon(notif.tipe);
+    final bgColor   = notif.sudahDibaca ? Colors.transparent : const Color(0xFFECF7F5);
 
-    return Container(
-      color: bgColor,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 44, height: 44,
-            decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
-            child: Icon(Icons.email_outlined, color: iconColor, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(notif.judul,
-                    style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.textPrimary)),
-                const SizedBox(height: 3),
-                Text(notif.pesan,
-                    style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: AppTheme.textSecondary,
-                        height: 1.4)),
-                const SizedBox(height: 5),
-                Text(notif.waktu,
-                    style: GoogleFonts.poppins(
-                        fontSize: 11, color: AppTheme.textSecondary)),
-              ],
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        color: bgColor,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44, height: 44,
+              decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+              child: Icon(iconData, color: iconColor, size: 20),
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(notif.judul,
+                      style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          fontWeight: notif.sudahDibaca
+                              ? FontWeight.w500
+                              : FontWeight.w700,
+                          color: AppTheme.textPrimary)),
+                  const SizedBox(height: 3),
+                  Text(notif.pesan,
+                      style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                          height: 1.4),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 5),
+                  Text(relativeTime(notif.createdAt),
+                      style: GoogleFonts.poppins(
+                          fontSize: 11, color: AppTheme.textSecondary)),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
