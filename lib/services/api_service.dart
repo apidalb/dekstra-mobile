@@ -1,8 +1,11 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, ValueNotifier;
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// ── Global tab switcher — dipakai form surat untuk kembali ke Beranda ────────
+final homeTabIndex = ValueNotifier<int>(0);
 
 // ── Base URL ──────────────────────────────────────────────────────────────────
 // Flutter Web (Chrome) : backend di localhost karena browser & server sama-sama di PC

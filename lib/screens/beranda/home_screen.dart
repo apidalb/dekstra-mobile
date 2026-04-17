@@ -123,6 +123,15 @@ class _HomeScreenState extends State<HomeScreen> {
       const LayananScreen(),
       AkunScreen(userName: widget.userName, userEmail: widget.userEmail),
     ];
+    homeTabIndex.addListener(_onTabSwitch);
+  }
+
+  void _onTabSwitch() => setState(() => _selectedIndex = homeTabIndex.value);
+
+  @override
+  void dispose() {
+    homeTabIndex.removeListener(_onTabSwitch);
+    super.dispose();
   }
 
   @override

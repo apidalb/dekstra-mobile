@@ -559,6 +559,13 @@ class _SuratStepperPageState extends State<SuratStepperPage> {
       }
       if (!mounted) return;
       Navigator.of(context).popUntil((route) => route.isFirst);
+      homeTabIndex.value = 0;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Permohonan berhasil diajukan.',
+            style: GoogleFonts.poppins(fontSize: 13)),
+        backgroundColor: AppTheme.primary,
+        behavior: SnackBarBehavior.floating,
+      ));
     } on ApiException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
