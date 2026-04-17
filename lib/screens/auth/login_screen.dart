@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -34,12 +35,50 @@ class _LoginScreenState extends State<LoginScreen> {
   // OTP yang dikembalikan dari backend (sementara ditampilkan di dev hint)
   String? _receivedOtp;
 
+  // Timer OTP (5 menit) dan cooldown kirim ulang (30 detik)
+  Timer? _otpTimer;
+  Timer? _resendTimer;
+  int _otpSecondsLeft  = 300;
+  int _resendCooldown  = 0;
+
   @override
   void dispose() {
+    _otpTimer?.cancel();
+    _resendTimer?.cancel();
     _identifierController.dispose();
     _passwordController.dispose();
     _otpController.dispose();
     super.dispose();
+  }
+
+  void _startOtpTimer() {
+    _otpTimer?.cancel();
+    _otpSecondsLeft = 300;
+    _otpTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) { t.cancel(); return; }
+      setState(() {
+        if (_otpSecondsLeft > 0) {
+          _otpSecondsLeft--;
+        } else {
+          t.cancel();
+        }
+      });
+    });
+  }
+
+  void _startResendCooldown() {
+    _resendTimer?.cancel();
+    _resendCooldown = 30;
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) { t.cancel(); return; }
+      setState(() {
+        if (_resendCooldown > 0) {
+          _resendCooldown--;
+        } else {
+          t.cancel();
+        }
+      });
+    });
   }
 
   // ── Validasi identifier: NIK (16 digit) atau email ────────────────────────
@@ -92,6 +131,8 @@ class _LoginScreenState extends State<LoginScreen> {
         _step         = 1;
         _errorMessage = null;
       });
+      _startOtpTimer();
+      _startResendCooldown();
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _errorMessage = e.message);
@@ -155,15 +196,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // ── Kembali ke Step 1 ─────────────────────────────────────────────────────
   void _backToCredentials() {
+    _otpTimer?.cancel();
+    _resendTimer?.cancel();
     setState(() {
-      _step         = 0;
-      _errorMessage = null;
+      _step          = 0;
+      _errorMessage  = null;
+      _otpSecondsLeft = 300;
+      _resendCooldown = 0;
       _otpController.clear();
     });
   }
 
   // ── Kirim ulang OTP ───────────────────────────────────────────────────────
   void _resendOtp() async {
+    if (_resendCooldown > 0) return;
     setState(() {
       _errorMessage = null;
       _otpController.clear();
@@ -178,6 +224,8 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (_) {}
 
     if (!mounted) return;
+    _startOtpTimer();
+    _startResendCooldown();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -391,6 +439,34 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             validator: _validateOtp,
           ),
+          const SizedBox(height: 16),
+
+          // Countdown OTP
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.timer_outlined,
+                  size: 14,
+                  color: _otpSecondsLeft > 0
+                      ? AppTheme.primary
+                      : AppTheme.textSecondary),
+              const SizedBox(width: 4),
+              Text(
+                _otpSecondsLeft > 0
+                    ? 'Gunakan kode sebelum: '
+                        '${(_otpSecondsLeft ~/ 60).toString().padLeft(2, '0')}:'
+                        '${(_otpSecondsLeft % 60).toString().padLeft(2, '0')}'
+                    : 'Kode OTP telah kedaluwarsa',
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: _otpSecondsLeft > 0
+                      ? AppTheme.primary
+                      : AppTheme.textSecondary,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
 
           // Kirim ulang OTP
@@ -398,17 +474,21 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Tidak menerima kode? ',
+                'Belum menerima kode OTP? ',
                 style: GoogleFonts.poppins(
                     fontSize: 13, color: AppTheme.textSecondary),
               ),
               GestureDetector(
-                onTap: _isLoading ? null : _resendOtp,
+                onTap: (_isLoading || _resendCooldown > 0) ? null : _resendOtp,
                 child: Text(
-                  'Kirim Ulang',
+                  _resendCooldown > 0
+                      ? 'Kirim Ulang (${_resendCooldown}s)'
+                      : 'Kirim Ulang',
                   style: GoogleFonts.poppins(
                     fontSize: 13,
-                    color: AppTheme.primary,
+                    color: _resendCooldown > 0
+                        ? AppTheme.textSecondary
+                        : AppTheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
