@@ -15,7 +15,10 @@ class AkunScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initial = userName.isNotEmpty ? userName[0].toUpperCase() : 'U';
+    final parts   = userName.trim().split(' ');
+    final initial = parts.length >= 2
+        ? '${parts[0][0]}${parts[1][0]}'.toUpperCase()
+        : (userName.isNotEmpty ? userName[0].toUpperCase() : 'U');
 
     return SafeArea(
       child: Column(

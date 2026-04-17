@@ -120,13 +120,22 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       // Token & user info sudah disimpan di ApiService.login()
       final email = data['email'] as String? ?? '';
-      final nik   = data['nik']   as String? ?? '';
 
+      // Ambil nama lengkap dari profil setelah login
+      String namaLengkap = email;
+      try {
+        final profil = await ApiService.getProfil();
+        namaLengkap = profil['nama_lengkap'] as String? ?? email;
+      } catch (_) {
+        // Jika gagal ambil profil, fallback ke email
+      }
+
+      if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
           builder: (_) => HomeScreen(
-            userName : email.isNotEmpty ? email : nik,
+            userName : namaLengkap,
             userEmail: email,
           ),
         ),

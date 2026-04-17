@@ -229,6 +229,14 @@ class _BerandaTabState extends State<_BerandaTab> {
     return _list.map((p) => p.jenisSurat).where((j) => seen.add(j)).toList()..sort();
   }
 
+  String _avatarInitials(String name) {
+    if (name.isEmpty) return 'U';
+    final parts = name.trim().split(' ');
+    return parts.length >= 2
+        ? '${parts[0][0]}${parts[1][0]}'.toUpperCase()
+        : parts[0][0].toUpperCase();
+  }
+
   bool get _hasActiveFilter =>
       _filterStatus != null ||
       _filterJenis != null ||
@@ -590,9 +598,7 @@ class _BerandaTabState extends State<_BerandaTab> {
                   ),
                   child: Center(
                     child: Text(
-                      widget.userName.isNotEmpty
-                          ? widget.userName[0].toUpperCase()
-                          : 'U',
+                      _avatarInitials(widget.userName),
                       style: GoogleFonts.poppins(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
