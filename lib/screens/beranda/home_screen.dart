@@ -806,46 +806,59 @@ class _BerandaTabState extends State<_BerandaTab> {
 
           // ── Daftar permohonan (info teks masuk dalam list) ──────────
           Expanded(
-            child: _isLoading
+            child: RefreshIndicator(
+              onRefresh: _loadPermohonan,
+              color: AppTheme.primary,
+              child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _errorMsg != null
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.cloud_off_outlined,
-                                size: 48, color: AppTheme.border),
-                            const SizedBox(height: 12),
-                            Text(_errorMsg!,
-                                style: GoogleFonts.poppins(
-                                    color: AppTheme.textSecondary, fontSize: 13),
-                                textAlign: TextAlign.center),
-                            const SizedBox(height: 12),
-                            TextButton.icon(
-                              onPressed: _loadPermohonan,
-                              icon: const Icon(Icons.refresh, size: 16),
-                              label: Text('Coba lagi',
-                                  style: GoogleFonts.poppins(fontSize: 13)),
+                : _errorMsg != null || filtered.isEmpty
+                    ? LayoutBuilder(
+                        builder: (_, c) => SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: SizedBox(
+                            height: c.maxHeight,
+                            child: Center(
+                              child: _errorMsg != null
+                                  ? Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.cloud_off_outlined,
+                                            size: 48, color: AppTheme.border),
+                                        const SizedBox(height: 12),
+                                        Text(_errorMsg!,
+                                            style: GoogleFonts.poppins(
+                                                color: AppTheme.textSecondary,
+                                                fontSize: 13),
+                                            textAlign: TextAlign.center),
+                                        const SizedBox(height: 12),
+                                        TextButton.icon(
+                                          onPressed: _loadPermohonan,
+                                          icon: const Icon(Icons.refresh,
+                                              size: 16),
+                                          label: Text('Coba lagi',
+                                              style: GoogleFonts.poppins(
+                                                  fontSize: 13)),
+                                        ),
+                                      ],
+                                    )
+                                  : Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.inbox_outlined,
+                                            size: 48, color: AppTheme.border),
+                                        const SizedBox(height: 12),
+                                        Text('Tidak ada permohonan aktif',
+                                            style: GoogleFonts.poppins(
+                                                color: AppTheme.textSecondary,
+                                                fontSize: 14)),
+                                      ],
+                                    ),
                             ),
-                          ],
+                          ),
                         ),
                       )
-                    : filtered.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.inbox_outlined,
-                                    size: 48, color: AppTheme.border),
-                                const SizedBox(height: 12),
-                                Text('Tidak ada permohonan aktif',
-                                    style: GoogleFonts.poppins(
-                                        color: AppTheme.textSecondary,
-                                        fontSize: 14)),
-                              ],
-                            ),
-                          )
-                        : ListView.separated(
+                    : ListView.separated(
+                        physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                     itemCount: filtered.length + 1,
                     separatorBuilder: (_, i) => i < filtered.length - 1
@@ -867,6 +880,7 @@ class _BerandaTabState extends State<_BerandaTab> {
                       );
                     },
                   ),
+            ),
           ),
         ],
       ),

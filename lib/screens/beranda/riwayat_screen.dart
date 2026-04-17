@@ -423,66 +423,81 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
 
           // ── List riwayat ─────────────────────────────────────────────
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _errorMsg != null
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.cloud_off_outlined,
-                                size: 48, color: AppTheme.border),
-                            const SizedBox(height: 12),
-                            Text(_errorMsg!,
+            child: RefreshIndicator(
+              onRefresh: _loadRiwayat,
+              color: AppTheme.primary,
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _errorMsg != null || filtered.isEmpty
+                      ? LayoutBuilder(
+                          builder: (_, c) => SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: SizedBox(
+                              height: c.maxHeight,
+                              child: Center(
+                                child: _errorMsg != null
+                                    ? Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(Icons.cloud_off_outlined,
+                                              size: 48, color: AppTheme.border),
+                                          const SizedBox(height: 12),
+                                          Text(_errorMsg!,
+                                              style: GoogleFonts.poppins(
+                                                  color: AppTheme.textSecondary,
+                                                  fontSize: 13),
+                                              textAlign: TextAlign.center),
+                                          const SizedBox(height: 12),
+                                          TextButton.icon(
+                                            onPressed: _loadRiwayat,
+                                            icon: const Icon(Icons.refresh,
+                                                size: 16),
+                                            label: Text('Coba lagi',
+                                                style: GoogleFonts.poppins(
+                                                    fontSize: 13)),
+                                          ),
+                                        ],
+                                      )
+                                    : Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(Icons.history,
+                                              size: 48, color: AppTheme.border),
+                                          const SizedBox(height: 12),
+                                          Text('Belum ada riwayat permohonan',
+                                              style: GoogleFonts.poppins(
+                                                  color: AppTheme.textSecondary,
+                                                  fontSize: 14)),
+                                        ],
+                                      ),
+                              ),
+                            ),
+                          ),
+                        )
+                      : ListView.separated(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                          itemCount: filtered.length + 1,
+                          separatorBuilder: (_, i) => i < filtered.length - 1
+                              ? const Divider(height: 1, color: AppTheme.border)
+                              : const SizedBox.shrink(),
+                          itemBuilder: (_, i) {
+                            if (i < filtered.length) {
+                              return PermohonanCard(item: filtered[i]);
+                            }
+                            return Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 8, 0, 4),
+                              child: Text(
+                                'Menampilkan ${filtered.length} dari ${_baseList.length} data',
+                                textAlign: TextAlign.center,
                                 style: GoogleFonts.poppins(
-                                    color: AppTheme.textSecondary, fontSize: 13),
-                                textAlign: TextAlign.center),
-                            const SizedBox(height: 12),
-                            TextButton.icon(
-                              onPressed: _loadRiwayat,
-                              icon: const Icon(Icons.refresh, size: 16),
-                              label: Text('Coba lagi',
-                                  style: GoogleFonts.poppins(fontSize: 13)),
-                            ),
-                          ],
+                                    fontSize: 11,
+                                    color: AppTheme.textSecondary),
+                              ),
+                            );
+                          },
                         ),
-                      )
-                    : filtered.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.history,
-                                    size: 48, color: AppTheme.border),
-                                const SizedBox(height: 12),
-                                Text('Belum ada riwayat permohonan',
-                                    style: GoogleFonts.poppins(
-                                        color: AppTheme.textSecondary,
-                                        fontSize: 14)),
-                              ],
-                            ),
-                          )
-                        : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                    itemCount: filtered.length + 1,
-                    separatorBuilder: (_, i) => i < filtered.length - 1
-                        ? const Divider(height: 1, color: AppTheme.border)
-                        : const SizedBox.shrink(),
-                    itemBuilder: (_, i) {
-                      if (i < filtered.length) {
-                        return PermohonanCard(item: filtered[i]);
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 8, 0, 4),
-                        child: Text(
-                          'Menampilkan ${filtered.length} dari ${_baseList.length} data',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.poppins(
-                              fontSize: 11, color: AppTheme.textSecondary),
-                        ),
-                      );
-                    },
-                  ),
+            ),
           ),
         ],
       ),

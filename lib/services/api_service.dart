@@ -327,6 +327,33 @@ class ApiService {
     _handleResponse(res);
   }
 
+  /// Refresh access token menggunakan refresh token yang tersimpan.
+  /// Mengembalikan true jika berhasil, false jika gagal (token di-clear otomatis).
+  /// POST /auth/refresh/
+  static Future<bool> refreshAccessToken() async {
+    final refresh = await getRefreshToken();
+    if (refresh == null) return false;
+    try {
+      final res = await http.post(
+        Uri.parse('$kBaseUrl/auth/refresh/'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'refresh': refresh}),
+      );
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body) as Map<String, dynamic>;
+        await saveTokens(
+          access : data['access']  as String,
+          refresh: data['refresh'] as String,
+        );
+        return true;
+      }
+      await clearTokens();
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Logout — hapus token lokal
   static Future<void> logout() async {
     await clearTokens();
