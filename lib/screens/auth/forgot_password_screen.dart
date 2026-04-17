@@ -4,51 +4,46 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
 import '../../services/api_service.dart';
-import '../beranda/home_screen.dart';
-import 'register_screen.dart';
-import 'forgot_password_screen.dart';
 
-// ── LoginScreen ───────────────────────────────────────────────────────────────
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  // Step: 0 = Masukkan Kredensial, 1 = Verifikasi OTP
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  // Step: 0 = Masukkan Email, 1 = Verifikasi OTP + Password Baru
   int _step = 0;
 
-  final _credFormKey = GlobalKey<FormState>();
-  final _otpFormKey  = GlobalKey<FormState>();
+  final _emailFormKey    = GlobalKey<FormState>();
+  final _otpFormKey      = GlobalKey<FormState>();
 
-  final _identifierController = TextEditingController();
-  final _passwordController   = TextEditingController();
-  final _otpController        = TextEditingController();
+  final _emailController       = TextEditingController();
+  final _otpController         = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmController     = TextEditingController();
 
-  bool _obscurePassword = true;
-  bool _isLoading       = false;
+  bool _obscureNew     = true;
+  bool _obscureConfirm = true;
+  bool _isLoading      = false;
 
-  // Pesan error — ditampilkan sebagai banner merah
   String? _errorMessage;
-
-  // OTP yang dikembalikan dari backend (sementara ditampilkan di dev hint)
-  String? _receivedOtp;
 
   // Timer OTP (5 menit) dan cooldown kirim ulang (30 detik)
   Timer? _otpTimer;
   Timer? _resendTimer;
-  int _otpSecondsLeft  = 300;
-  int _resendCooldown  = 0;
+  int _otpSecondsLeft = 300;
+  int _resendCooldown = 0;
 
   @override
   void dispose() {
     _otpTimer?.cancel();
     _resendTimer?.cancel();
-    _identifierController.dispose();
-    _passwordController.dispose();
+    _emailController.dispose();
     _otpController.dispose();
+    _newPasswordController.dispose();
+    _confirmController.dispose();
     super.dispose();
   }
 
@@ -82,23 +77,12 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  // ── Validasi identifier: NIK (16 digit) atau email ────────────────────────
-  String? _validateIdentifier(String? v) {
-    if (v == null || v.isEmpty) return 'NIK / Email tidak boleh kosong';
-    final trimmed = v.trim();
-    if (trimmed.contains('@')) {
-      if (!RegExp(r'^[\w\.\+\-]+@[\w\-]+\.[a-zA-Z]{2,}$').hasMatch(trimmed)) {
-        return 'Format email tidak valid';
-      }
-    } else {
-      final digits = trimmed.replaceAll(RegExp(r'\D'), '');
-      if (digits.length != 16) return 'NIK harus 16 digit';
+  // ── Validasi ──────────────────────────────────────────────────────────────
+  String? _validateEmail(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Email tidak boleh kosong';
+    if (!RegExp(r'^[\w\.\+\-]+@[\w\-]+\.[a-zA-Z]{2,}$').hasMatch(v.trim())) {
+      return 'Format email tidak valid';
     }
-    return null;
-  }
-
-  String? _validatePassword(String? v) {
-    if (v == null || v.isEmpty) return 'Kata sandi tidak boleh kosong';
     return null;
   }
 
@@ -110,25 +94,30 @@ class _LoginScreenState extends State<LoginScreen> {
     return null;
   }
 
+  String? _validateNewPassword(String? v) {
+    if (v == null || v.isEmpty) return 'Kata sandi tidak boleh kosong';
+    if (v.length < 8) return 'Minimal 8 karakter';
+    return null;
+  }
+
+  String? _validateConfirm(String? v) {
+    if (v == null || v.isEmpty) return 'Konfirmasi kata sandi tidak boleh kosong';
+    if (v != _newPasswordController.text) return 'Kata sandi tidak cocok';
+    return null;
+  }
+
   // ── Step 1 — Request OTP ─────────────────────────────────────────────────
   void _requestOtp() async {
     setState(() => _errorMessage = null);
-    if (!_credFormKey.currentState!.validate()) return;
+    if (!_emailFormKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
     try {
-      final identifier = _identifierController.text.trim();
-      final password   = _passwordController.text;
-
-      final res = await ApiService.requestLoginOtp(
-        identifier: identifier,
-        password  : password,
+      await ApiService.requestResetPasswordOtp(
+        email: _emailController.text.trim(),
       );
-
       if (!mounted) return;
       setState(() {
-        // Backend mengembalikan OTP di response body (dev mode)
-        _receivedOtp  = res['otp']?.toString();
         _step         = 1;
         _errorMessage = null;
       });
@@ -146,42 +135,31 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // ── Step 2 — Verifikasi OTP & Login ──────────────────────────────────────
-  void _verifyOtpAndLogin() async {
+  // ── Step 2 — Verifikasi OTP & Ganti Password ─────────────────────────────
+  void _verifyAndReset() async {
     setState(() => _errorMessage = null);
     if (!_otpFormKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
     try {
-      final data = await ApiService.login(
-        identifier: _identifierController.text.trim(),
-        password  : _passwordController.text,
-        otp       : _otpController.text.trim(),
+      await ApiService.verifyResetPasswordOtp(
+        email      : _emailController.text.trim(),
+        otp        : _otpController.text.trim(),
+        newPassword: _newPasswordController.text,
       );
-
       if (!mounted) return;
-      // Token & user info sudah disimpan di ApiService.login()
-      final email = data['email'] as String? ?? '';
-
-      // Ambil nama lengkap dari profil setelah login
-      String namaLengkap = email;
-      try {
-        final profil = await ApiService.getProfil();
-        namaLengkap = profil['nama_lengkap'] as String? ?? email;
-      } catch (_) {
-        // Jika gagal ambil profil, fallback ke email
-      }
-
-      if (!mounted) return;
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (_) => HomeScreen(
-            userName : namaLengkap,
-            userEmail: email,
+      _otpTimer?.cancel();
+      _resendTimer?.cancel();
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Kata sandi berhasil diperbarui. Silakan masuk kembali.',
+            style: GoogleFonts.poppins(fontSize: 13),
           ),
+          backgroundColor: AppTheme.primary,
+          behavior: SnackBarBehavior.floating,
         ),
-        (route) => false,
       );
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -195,33 +173,32 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // ── Kembali ke Step 1 ─────────────────────────────────────────────────────
-  void _backToCredentials() {
+  // ── Kembali ke Step 0 ─────────────────────────────────────────────────────
+  void _backToEmail() {
     _otpTimer?.cancel();
     _resendTimer?.cancel();
     setState(() {
-      _step          = 0;
-      _errorMessage  = null;
+      _step           = 0;
+      _errorMessage   = null;
       _otpSecondsLeft = 300;
       _resendCooldown = 0;
       _otpController.clear();
+      _newPasswordController.clear();
+      _confirmController.clear();
     });
   }
 
-  // ── Kirim ulang OTP ───────────────────────────────────────────────────────
+  // ── Kirim Ulang OTP ───────────────────────────────────────────────────────
   void _resendOtp() async {
     if (_resendCooldown > 0) return;
     setState(() {
       _errorMessage = null;
       _otpController.clear();
     });
-
     try {
-      final res = await ApiService.requestLoginOtp(
-        identifier: _identifierController.text.trim(),
-        password  : _passwordController.text,
+      await ApiService.requestResetPasswordOtp(
+        email: _emailController.text.trim(),
       );
-      if (mounted) setState(() => _receivedOtp = res['otp']?.toString());
     } catch (_) {}
 
     if (!mounted) return;
@@ -239,126 +216,96 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ── Lupa Kata Sandi ───────────────────────────────────────────────────────
-  void _onForgotPassword() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
-    );
-  }
-
   // ─────────────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text('Masuk'),
-        leading: _step == 1
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios, size: 18),
-                onPressed: _isLoading ? null : _backToCredentials,
-              )
-            : IconButton(
-                icon: const Icon(Icons.arrow_back_ios, size: 18),
-                onPressed: () => Navigator.pop(context),
-              ),
+        title: const Text('Lupa Kata Sandi'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, size: 18),
+          onPressed: _isLoading
+              ? null
+              : (_step == 1 ? _backToEmail : () => Navigator.pop(context)),
+        ),
       ),
       body: Column(
         children: [
-          // ── Step Indicator ─────────────────────────────────────────
-          _StepIndicator(currentStep: _step),
-
-          // ── Form ───────────────────────────────────────────────────
+          _StepIndicatorFP(currentStep: _step),
           Expanded(
-            child: _step == 0
-                ? _buildCredentialsForm()
-                : _buildOtpForm(),
+            child: _step == 0 ? _buildEmailForm() : _buildOtpForm(),
           ),
-
-          // ── Bottom Buttons ─────────────────────────────────────────
           _buildBottomBar(),
         ],
       ),
     );
   }
 
-  // ── Step 1 Form ───────────────────────────────────────────────────────────
-  Widget _buildCredentialsForm() {
+  // ── Step 0 Form — Email ───────────────────────────────────────────────────
+  Widget _buildEmailForm() {
     return Form(
-      key: _credFormKey,
+      key: _emailFormKey,
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
           _errorBanner(),
 
-          // NIK / Email
-          _label('NIK / Email', required: true),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppTheme.border),
+            ),
+            child: Column(
+              children: [
+                const Icon(Icons.lock_reset_outlined,
+                    color: AppTheme.primary, size: 36),
+                const SizedBox(height: 12),
+                Text(
+                  'Atur Ulang Kata Sandi',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Masukkan email yang terdaftar pada akun Anda. Kami akan mengirimkan kode OTP untuk memverifikasi identitas Anda.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          _label('Email', required: true),
           const SizedBox(height: 6),
           TextFormField(
-            controller: _identifierController,
+            controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             style: GoogleFonts.poppins(fontSize: 14),
             onChanged: (_) {
               if (_errorMessage != null) setState(() => _errorMessage = null);
             },
             decoration: const InputDecoration(
-              hintText: 'Masukkan NIK atau email Anda',
+              hintText: 'Masukkan email Anda',
             ),
-            validator: _validateIdentifier,
+            validator: _validateEmail,
           ),
-          const SizedBox(height: 16),
-
-          // Kata Sandi
-          _label('Kata Sandi', required: true),
-          const SizedBox(height: 6),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: _obscurePassword,
-            style: GoogleFonts.poppins(fontSize: 14),
-            onChanged: (_) {
-              if (_errorMessage != null) setState(() => _errorMessage = null);
-            },
-            decoration: InputDecoration(
-              hintText: 'Masukkan kata sandi Anda',
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                  color: AppTheme.textSecondary,
-                  size: 20,
-                ),
-                onPressed: () =>
-                    setState(() => _obscurePassword = !_obscurePassword),
-              ),
-            ),
-            validator: _validatePassword,
-          ),
-
-          // Lupa Kata Sandi
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: GestureDetector(
-              onTap: _onForgotPassword,
-              child: Text(
-                'Lupa Kata Sandi?',
-                style: GoogleFonts.poppins(
-                  color: AppTheme.primary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-
         ],
       ),
     );
   }
 
-  // ── Step 2 Form ───────────────────────────────────────────────────────────
+  // ── Step 1 Form — OTP + Password Baru ────────────────────────────────────
   Widget _buildOtpForm() {
     return Form(
       key: _otpFormKey,
@@ -367,7 +314,6 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           _errorBanner(),
 
-          // Penjelasan
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -390,7 +336,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Kami mengirim kode verifikasi 6 digit ke email yang terdaftar pada akun Anda.',
+                  'Kami mengirim kode verifikasi 6 digit ke ${_emailController.text.trim()}',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     fontSize: 13,
@@ -488,23 +434,58 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 24),
 
-          // Dev hint: tampilkan OTP yang diterima dari backend (hanya saat development)
-          if (_receivedOtp != null) ...[
-            const SizedBox(height: 20),
-            _demoHint(
-              children: [
-                Text(
-                  'OTP (Development) : $_receivedOtp',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: AppTheme.primaryDark,
-                    height: 1.7,
-                  ),
+          const Divider(color: AppTheme.border),
+          const SizedBox(height: 20),
+
+          // Kata sandi baru
+          _label('Kata Sandi Baru', required: true),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: _newPasswordController,
+            obscureText: _obscureNew,
+            style: GoogleFonts.poppins(fontSize: 14),
+            decoration: InputDecoration(
+              hintText: 'Minimal 8 karakter',
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureNew
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  color: AppTheme.textSecondary,
+                  size: 20,
                 ),
-              ],
+                onPressed: () => setState(() => _obscureNew = !_obscureNew),
+              ),
             ),
-          ],
+            validator: _validateNewPassword,
+          ),
+          const SizedBox(height: 16),
+
+          // Konfirmasi kata sandi
+          _label('Konfirmasi Kata Sandi', required: true),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: _confirmController,
+            obscureText: _obscureConfirm,
+            style: GoogleFonts.poppins(fontSize: 14),
+            decoration: InputDecoration(
+              hintText: 'Ulangi kata sandi baru',
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureConfirm
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  color: AppTheme.textSecondary,
+                  size: 20,
+                ),
+                onPressed: () =>
+                    setState(() => _obscureConfirm = !_obscureConfirm),
+              ),
+            ),
+            validator: _validateConfirm,
+          ),
         ],
       ),
     );
@@ -524,49 +505,18 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ElevatedButton(
-            onPressed: _isLoading
-                ? null
-                : (_step == 0 ? _requestOtp : _verifyOtpAndLogin),
-            child: _isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Colors.white),
-                  )
-                : Text(_step == 0 ? 'KIRIM OTP' : 'MASUK'),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Belum punya akun? ',
-                style: GoogleFonts.poppins(
-                    color: AppTheme.textSecondary, fontSize: 14),
-              ),
-              GestureDetector(
-                onTap: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const RegisterScreen()),
-                ),
-                child: Text(
-                  'Daftar',
-                  style: GoogleFonts.poppins(
-                    color: AppTheme.primary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+      child: ElevatedButton(
+        onPressed: _isLoading
+            ? null
+            : (_step == 0 ? _requestOtp : _verifyAndReset),
+        child: _isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: Colors.white),
+              )
+            : Text(_step == 0 ? 'KIRIM OTP' : 'SIMPAN KATA SANDI'),
       ),
     );
   }
@@ -607,39 +557,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _demoHint({required List<Widget> children}) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryLight,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.info_outline,
-                  color: AppTheme.primary, size: 16),
-              const SizedBox(width: 6),
-              Text(
-                'Akun Demo',
-                style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          ...children,
-        ],
-      ),
-    );
-  }
-
   Widget _label(String text, {bool required = false}) {
     return RichText(
       text: TextSpan(
@@ -650,8 +567,7 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           TextSpan(text: text),
           if (required)
-            const TextSpan(
-                text: ' *', style: TextStyle(color: Colors.red)),
+            const TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
         ],
       ),
     );
@@ -659,12 +575,12 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 
 // ── Step Indicator ─────────────────────────────────────────────────────────────
-class _StepIndicator extends StatelessWidget {
+class _StepIndicatorFP extends StatelessWidget {
   final int currentStep;
 
-  static const _steps = ['Masukkan\nKredensial', 'Verifikasi\nOTP'];
+  static const _steps = ['Masukkan\nEmail', 'Verifikasi\nOTP'];
 
-  const _StepIndicator({required this.currentStep});
+  const _StepIndicatorFP({required this.currentStep});
 
   @override
   Widget build(BuildContext context) {
@@ -674,9 +590,7 @@ class _StepIndicator extends StatelessWidget {
       child: Row(
         children: List.generate(_steps.length * 2 - 1, (i) {
           if (i.isOdd) {
-            // Connector line
-            final stepIndex = i ~/ 2;
-            final done = stepIndex < currentStep;
+            final done = (i ~/ 2) < currentStep;
             return Expanded(
               child: Container(
                 height: 2,
@@ -684,9 +598,9 @@ class _StepIndicator extends StatelessWidget {
               ),
             );
           }
-          final stepIndex = i ~/ 2;
-          final isActive = stepIndex == currentStep;
-          final isDone   = stepIndex < currentStep;
+          final idx      = i ~/ 2;
+          final isActive = idx == currentStep;
+          final isDone   = idx < currentStep;
           return Column(
             children: [
               Container(
@@ -702,7 +616,7 @@ class _StepIndicator extends StatelessWidget {
                   child: isDone
                       ? const Icon(Icons.check, color: Colors.white, size: 16)
                       : Text(
-                          '${stepIndex + 1}',
+                          '${idx + 1}',
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -715,15 +629,12 @@ class _StepIndicator extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                _steps[stepIndex],
+                _steps[idx],
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
                   fontSize: 10,
-                  fontWeight:
-                      isActive ? FontWeight.w600 : FontWeight.w400,
-                  color: isActive
-                      ? AppTheme.primary
-                      : AppTheme.textSecondary,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                  color: isActive ? AppTheme.primary : AppTheme.textSecondary,
                   height: 1.3,
                 ),
               ),
