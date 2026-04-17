@@ -95,10 +95,7 @@ class AkunScreen extends StatelessWidget {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => ProfilScreen(
-                              userName: userName,
-                              userEmail: userEmail,
-                            ),
+                            builder: (_) => const ProfilScreen(),
                           ),
                         ),
                       ),
