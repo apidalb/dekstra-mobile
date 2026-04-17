@@ -151,7 +151,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: BottomNavigationBar(
           currentIndex: _selectedIndex,
-          onTap: (i) => setState(() => _selectedIndex = i),
+          onTap: (i) {
+            homeTabIndex.value = i;
+            setState(() => _selectedIndex = i);
+          },
           selectedItemColor: AppTheme.primary,
           unselectedItemColor: AppTheme.textSecondary,
           backgroundColor: Colors.transparent,
