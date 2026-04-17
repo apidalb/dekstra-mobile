@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
+import '../../services/api_service.dart';
+import '../auth/login_screen.dart';
 import 'profil_screen.dart';
 
 class AkunScreen extends StatelessWidget {
@@ -172,14 +174,46 @@ class AkunScreen extends StatelessWidget {
   }
 
   void _showLogoutDialog(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Fitur keluar belum tersedia.',
-          style: GoogleFonts.poppins(fontSize: 13),
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Keluar dari Akun',
+          style: GoogleFonts.poppins(
+              fontSize: 16, fontWeight: FontWeight.w700,
+              color: AppTheme.textPrimary),
         ),
-        backgroundColor: AppTheme.textSecondary,
-        behavior: SnackBarBehavior.floating,
+        content: Text(
+          'Apakah Anda yakin ingin keluar? Anda perlu masuk kembali untuk mengakses aplikasi.',
+          style: GoogleFonts.poppins(
+              fontSize: 13, color: AppTheme.textSecondary, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Batal',
+                style: GoogleFonts.poppins(
+                    fontSize: 13, color: AppTheme.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await ApiService.logout();
+              if (!context.mounted) return;
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
+            },
+            child: Text('Keluar',
+                style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.red)),
+          ),
+        ],
       ),
     );
   }
