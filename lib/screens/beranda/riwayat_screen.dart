@@ -34,7 +34,7 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
   Future<void> _loadRiwayat() async {
     setState(() { _isLoading = true; _errorMsg = null; });
     try {
-      final data = await ApiService.getPermohonan();
+      final data = await ApiService.getRiwayatPengajuan();
       final all  = data.map((j) => Permohonan.fromJson(j)).toList();
       setState(() {
         _baseList = all.where((p) => _riwayatStatuses.contains(p.status)).toList();

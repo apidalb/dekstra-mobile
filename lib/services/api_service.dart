@@ -395,6 +395,20 @@ class ApiService {
   // Permohonan
   // ════════════════════════════════════════════════════════════════════════
 
+  /// Riwayat pengajuan milik warga (status Disetujui / Ditolak)
+  /// GET /riwayat-pengajuan/
+  static Future<List<Map<String, dynamic>>> getRiwayatPengajuan() async {
+    final res = await http.get(
+      Uri.parse('$kBaseUrl/riwayat-pengajuan/'),
+      headers: await _jsonHeaders(auth: true),
+    );
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      final list = jsonDecode(res.body) as List<dynamic>;
+      return list.cast<Map<String, dynamic>>();
+    }
+    throw ApiException(res.statusCode, jsonDecode(res.body));
+  }
+
   static Future<List<Map<String, dynamic>>> getPermohonan() async {
     final res = await http.get(
       Uri.parse('$kBaseUrl/pengajuan-surat/'),
