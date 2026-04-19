@@ -33,6 +33,8 @@ class _SPBarangState extends State<SuratPengantarBarangScreen> {
   final _gAlamatCtrl = TextEditingController();
 
   // Data Barang & Kendaraan
+  final _asalCtrl           = TextEditingController();
+  final _tujuanCtrl         = TextEditingController();
   final _jenisBarangCtrl    = TextEditingController();
   final _jumlahBarangCtrl   = TextEditingController();
   final _jenisKendaraanCtrl = TextEditingController();
@@ -44,30 +46,34 @@ class _SPBarangState extends State<SuratPengantarBarangScreen> {
     for (final c in [
       _pNamaCtrl, _pNikCtrl, _pTempatCtrl, _pTglCtrl, _pPekCtrl, _pAlamatCtrl,
       _gNamaCtrl, _gNikCtrl, _gTempatCtrl, _gTglCtrl, _gPekCtrl, _gAlamatCtrl,
+      _asalCtrl, _tujuanCtrl,
       _jenisBarangCtrl, _jumlahBarangCtrl, _jenisKendaraanCtrl, _nopolCtrl, _supirCtrl,
     ]) { c.dispose(); }
     super.dispose();
   }
 
   Future<Map<String, dynamic>> _buildPayload() async => {
-    'pengirim_nama'          : _pNamaCtrl.text,
-    'pengirim_nik'           : _pNikCtrl.text,
-    'pengirim_tempat_lahir'  : _pTempatCtrl.text,
-    'pengirim_tanggal_lahir' : ddmmyyyyToIso(_pTglCtrl.text),
-    'pengirim_jenis_kelamin' : _pJk,
-    'pengirim_pekerjaan'     : _pPekCtrl.text,
-    'pengirim_alamat'        : _pAlamatCtrl.text,
-    'penerima_nama'          : _gNamaCtrl.text,
-    'penerima_nik'           : _gNikCtrl.text,
-    'penerima_tempat_lahir'  : _gTempatCtrl.text,
-    'penerima_tanggal_lahir' : ddmmyyyyToIso(_gTglCtrl.text),
-    'penerima_jenis_kelamin' : _gJk,
-    'penerima_pekerjaan'     : _gPekCtrl.text,
-    'penerima_alamat'        : _gAlamatCtrl.text,
+    'pemilik_nama_lengkap'   : _pNamaCtrl.text,
+    'pemilik_nik'            : _pNikCtrl.text,
+    'pemilik_tempat_lahir'   : _pTempatCtrl.text,
+    'pemilik_tanggal_lahir'  : ddmmyyyyToIso(_pTglCtrl.text),
+    'pemilik_jenis_kelamin'  : _pJk,
+    'pemilik_pekerjaan'      : _pPekCtrl.text,
+    'pemilik_alamat'         : _pAlamatCtrl.text,
+    'pengantar_nama_lengkap' : _gNamaCtrl.text,
+    'pengantar_nik'          : _gNikCtrl.text,
+    'pengantar_tempat_lahir' : _gTempatCtrl.text,
+    'pengantar_tanggal_lahir': ddmmyyyyToIso(_gTglCtrl.text),
+    'pengantar_jenis_kelamin': _gJk,
+    'pengantar_pekerjaan'    : _gPekCtrl.text,
+    'pengantar_alamat'       : _gAlamatCtrl.text,
+    'asal_barang'            : _asalCtrl.text,
+    'tujuan_barang'          : _tujuanCtrl.text,
+    'no'                     : '1',
     'jenis_barang'           : _jenisBarangCtrl.text,
     'jumlah_barang'          : _jumlahBarangCtrl.text,
     'jenis_kendaraan'        : _jenisKendaraanCtrl.text,
-    'nopol'                  : _nopolCtrl.text,
+    'nomor_polisi'           : _nopolCtrl.text,
     'nama_supir'             : _supirCtrl.text,
   };
 
@@ -150,6 +156,20 @@ class _SPBarangState extends State<SuratPengantarBarangScreen> {
       sectionCard(children: [
         sectionHeader('Data Barang & Kendaraan'),
         const SizedBox(height: 16),
+        fieldLabel('Asal Barang', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _asalCtrl,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan asal barang'),
+          validator: (v) => validateRequired(v, 'Asal barang')),
+        const SizedBox(height: 14),
+        fieldLabel('Tujuan Barang', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _tujuanCtrl,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan tujuan barang'),
+          validator: (v) => validateRequired(v, 'Tujuan barang')),
+        const SizedBox(height: 14),
         fieldLabel('Jenis Barang', required: true),
         const SizedBox(height: 6),
         TextFormField(controller: _jenisBarangCtrl,
