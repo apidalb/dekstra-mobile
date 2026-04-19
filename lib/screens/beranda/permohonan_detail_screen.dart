@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
+import '../../services/api_service.dart';
 import 'home_screen.dart';
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -13,7 +14,7 @@ class _TimelineStep {
   final String? oleh;
   final Color iconBg;
   final IconData icon;
-  final bool isActive; // completed or current
+  final bool isActive;
 
   const _TimelineStep({
     required this.title,
@@ -34,132 +35,138 @@ const _amber  = Color(0xFFF59E0B);
 const _orange = Color(0xFFD97706);
 const _blue   = Color(0xFF2563EB);
 const _purple = Color(0xFF7C3AED);
-const _green  = Color(0xFF059669);
 const _red    = Color(0xFFE11D48);
+const _cyan   = Color(0xFF0891B2);
 const _muted  = Color(0xFFD1D5DB);
 
-int _statusIndex(String status) {
-  switch (status) {
-    case 'Menunggu Verifikasi': return 2;
-    case 'Disetujui':
-    case 'Ditolak':             return 5;
-    default:                    return 2;
+String _fmtDateTime(String isoStr) {
+  final dt = DateTime.parse(isoStr).toLocal();
+  return '${dt.day.toString().padLeft(2, '0')}-'
+      '${dt.month.toString().padLeft(2, '0')}-'
+      '${dt.year} '
+      '${dt.hour.toString().padLeft(2, '0')}:'
+      '${dt.minute.toString().padLeft(2, '0')}:'
+      '${dt.second.toString().padLeft(2, '0')}';
+}
+
+Color _actorColor(String actor) {
+  switch (actor) {
+    case 'RT':          return _orange;
+    case 'RW':          return _blue;
+    case 'ADMIN':       return _purple;
+    case 'Kepala Desa': return _cyan;
+    default:            return _grey;
   }
 }
 
-String _fmtTs(DateTime d, {int addDays = 0, int h = 8, int m = 0}) {
-  final t = d.add(Duration(days: addDays));
-  return '${t.day.toString().padLeft(2,'0')}-'
-         '${t.month.toString().padLeft(2,'0')}-'
-         '${t.year} '
-         '${h.toString().padLeft(2,'0')}:'
-         '${m.toString().padLeft(2,'0')}:00';
-}
+_TimelineStep _stepFromApi(Map<String, dynamic> r) {
+  final aksi        = r['status'] as String;
+  final actor       = r['actor']  as String;
+  final description = r['description'] as String? ?? '-';
+  final tsRaw       = r['timestamp'] as String?;
+  final timestamp   = tsRaw != null ? _fmtDateTime(tsRaw) : null;
 
-List<_TimelineStep> _buildTimeline(Permohonan p) {
-  final idx  = _statusIndex(p.status);
-  final d    = p.tanggal;
-  final isDitolak = p.status == 'Ditolak';
-
-  bool done(int step)   => idx > step;
-  bool active(int step) => idx >= step;
-
-  Color clr(int step, Color c) => active(step) ? c : _muted;
-
-  return [
-    // ── 0: Pengajuan Belum Dikirim ───────────────────────────────────────
-    _TimelineStep(
-      title: 'Pengajuan Belum Dikirim',
-      timestamp: _fmtTs(d, h: 8, m: 0),
-      description: 'Pengajuan belum dikirim oleh pemohon.',
-      iconBg: _grey,
-      icon: Icons.schedule_outlined,
-      isActive: true,
-    ),
-
-    // ── 1: Pengajuan Dikirim ─────────────────────────────────────────────
-    _TimelineStep(
-      title: 'Pengajuan Dikirim',
-      timestamp: _fmtTs(d, h: 9, m: 30),
-      description: 'Pengajuan sudah dikirim dan sedang menunggu verifikasi.',
-      iconBg: _amber,
-      icon: Icons.send_outlined,
-      isActive: true,
-    ),
-
-    // ── 2: Verifikasi RT ──────────────────────────────────────────────────
-    _TimelineStep(
-      title: done(2) ? 'Diverifikasi RT' : 'Menunggu Verifikasi RT',
-      timestamp: done(2) ? _fmtTs(d, addDays: 1, h: 7, m: 15) : null,
-      description: done(2)
-          ? 'Pengajuan telah diverifikasi oleh RT.'
-          : 'Menunggu proses verifikasi oleh RT.',
-      oleh: done(2) ? 'RT' : null,
-      iconBg: clr(2, _orange),
-      icon: Icons.assignment_turned_in_outlined,
-      isActive: active(2),
-    ),
-
-    // ── 3: Verifikasi RW ──────────────────────────────────────────────────
-    _TimelineStep(
-      title: done(3) ? 'Diverifikasi RW' : 'Menunggu Verifikasi RW',
-      timestamp: done(3) ? _fmtTs(d, addDays: 1, h: 8, m: 0) : null,
-      description: done(3)
-          ? 'Pengajuan telah diverifikasi oleh RW.'
-          : 'Menunggu proses verifikasi oleh RW.',
-      oleh: done(3) ? 'RW' : null,
-      iconBg: clr(3, _blue),
-      icon: Icons.assignment_turned_in_outlined,
-      isActive: active(3),
-    ),
-
-    // ── 4: Verifikasi Admin ───────────────────────────────────────────────
-    _TimelineStep(
-      title: done(4) ? 'Diverifikasi Admin' : 'Menunggu Verifikasi Admin',
-      timestamp: done(4) ? _fmtTs(d, addDays: 1, h: 8, m: 30) : null,
-      description: done(4)
-          ? 'Pengajuan telah diverifikasi oleh Admin Desa.'
-          : 'Menunggu proses verifikasi oleh Admin Desa.',
-      oleh: done(4) ? 'Admin' : null,
-      iconBg: clr(4, _purple),
-      icon: Icons.assignment_turned_in_outlined,
-      isActive: active(4),
-    ),
-
-    // ── 5: Final ──────────────────────────────────────────────────────────
-    _TimelineStep(
-      title: !active(5)
-          ? 'Menunggu Keputusan'
-          : (isDitolak ? 'Pengajuan Ditolak' : 'Pengajuan Disetujui'),
-      timestamp: active(5)
-          ? _fmtTs(d, addDays: 1, h: isDitolak ? 8 : 9, m: isDitolak ? 49 : 0)
-          : null,
-      description: !active(5)
-          ? 'Menunggu keputusan akhir dari Admin Desa.'
-          : (isDitolak
-              ? 'Pengajuan ditolak. Silakan periksa persyaratan dan ajukan kembali.'
-              : 'Selamat! Pengajuan Anda telah disetujui.'),
-      iconBg: !active(5) ? _muted : (isDitolak ? _red : _green),
-      icon: !active(5)
-          ? Icons.hourglass_empty_outlined
-          : (isDitolak ? Icons.cancel_outlined : Icons.check_circle_outline),
-      isActive: active(5),
-    ),
-  ];
+  switch (aksi) {
+    case 'Ajukan':
+      return _TimelineStep(
+        title:       'Pengajuan Diajukan',
+        timestamp:   timestamp,
+        description: description == '-'
+            ? 'Pengajuan sudah dikirim dan sedang menunggu verifikasi.'
+            : description,
+        iconBg:   _amber,
+        icon:     Icons.send_outlined,
+        isActive: true,
+      );
+    case 'Setuju':
+      return _TimelineStep(
+        title:       'Disetujui oleh $actor',
+        timestamp:   timestamp,
+        description: description == '-'
+            ? 'Pengajuan telah diverifikasi oleh $actor.'
+            : description,
+        oleh:     actor,
+        iconBg:   _actorColor(actor),
+        icon:     Icons.assignment_turned_in_outlined,
+        isActive: true,
+      );
+    case 'Tolak':
+      return _TimelineStep(
+        title:       'Ditolak oleh $actor',
+        timestamp:   timestamp,
+        description: description == '-'
+            ? 'Pengajuan ditolak oleh $actor. Periksa catatan dan ajukan kembali.'
+            : description,
+        oleh:     actor,
+        iconBg:   _red,
+        icon:     Icons.cancel_outlined,
+        isActive: true,
+      );
+    default:
+      return _TimelineStep(
+        title:       aksi,
+        timestamp:   timestamp,
+        description: description,
+        oleh:        actor,
+        iconBg:      _grey,
+        icon:        Icons.info_outline,
+        isActive:    true,
+      );
+  }
 }
 
 // ════════════════════════════════════════════════════════════════════════════
 // PermohonanDetailScreen
 // ════════════════════════════════════════════════════════════════════════════
-class PermohonanDetailScreen extends StatelessWidget {
+class PermohonanDetailScreen extends StatefulWidget {
   final Permohonan permohonan;
   const PermohonanDetailScreen({super.key, required this.permohonan});
 
   @override
+  State<PermohonanDetailScreen> createState() => _PermohonanDetailScreenState();
+}
+
+class _PermohonanDetailScreenState extends State<PermohonanDetailScreen> {
+  List<_TimelineStep>? _steps;
+  bool _isLoading = true;
+  String? _errorMsg;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDetail();
+  }
+
+  Future<void> _loadDetail() async {
+    final nomor = widget.permohonan.nomorPermohonan;
+    if (nomor.isEmpty) {
+      if (mounted) setState(() { _steps = []; _isLoading = false; });
+      return;
+    }
+    setState(() { _isLoading = true; _errorMsg = null; });
+    try {
+      final data    = await ApiService.getRiwayatPengajuanDetail(nomor);
+      final riwayat = data['riwayat'] as List<dynamic>;
+      if (mounted) {
+        setState(() {
+          _steps = riwayat
+              .map((r) => _stepFromApi(r as Map<String, dynamic>))
+              .toList();
+          _isLoading = false;
+        });
+      }
+    } on ApiException catch (e) {
+      if (mounted) setState(() { _errorMsg = e.message; _isLoading = false; });
+    } catch (_) {
+      if (mounted) setState(() { _errorMsg = 'Gagal memuat riwayat'; _isLoading = false; });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final steps    = _buildTimeline(permohonan);
-    final statusBg = _statusBgColor(permohonan.status);
-    final statusFg = _statusFgColor(permohonan.status);
+    final p         = widget.permohonan;
+    final statusBg  = _statusBgColor(p.status);
+    final statusFg  = _statusFgColor(p.status);
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -170,138 +177,178 @@ class PermohonanDetailScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-        children: [
+      body: RefreshIndicator(
+        onRefresh: _loadDetail,
+        color: AppTheme.primary,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+          children: [
 
-          // ── Header card ────────────────────────────────────────────
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppTheme.surface,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppTheme.border),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Judul
-                Text(
-                  permohonan.jenisSurat,
-                  style: GoogleFonts.poppins(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
+            // ── Header card ──────────────────────────────────────────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.surface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    p.jenisSurat,
+                    style: GoogleFonts.poppins(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                // ID
-                Text(
-                  permohonan.nomorPermohonan.isNotEmpty
-                      ? '#${permohonan.nomorPermohonan}'
-                      : '#${permohonan.id}',
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                const Divider(height: 1, color: AppTheme.border),
-                const SizedBox(height: 14),
-
-                // Status
-                Center(
-                  child: Text(
-                    'Status',
+                  const SizedBox(height: 2),
+                  Text(
+                    p.nomorPermohonan.isNotEmpty
+                        ? '#${p.nomorPermohonan}'
+                        : '#${p.id}',
                     style: GoogleFonts.poppins(
                       fontSize: 13,
-                      fontWeight: FontWeight.w500,
                       color: AppTheme.textSecondary,
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: statusBg,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                  const SizedBox(height: 14),
+                  const Divider(height: 1, color: AppTheme.border),
+                  const SizedBox(height: 14),
+                  Center(
                     child: Text(
-                      permohonan.status,
+                      'Status',
                       style: GoogleFonts.poppins(
                         fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: statusFg,
+                        fontWeight: FontWeight.w500,
+                        color: AppTheme.textSecondary,
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 14),
-                const Divider(height: 1, color: AppTheme.border),
-                const SizedBox(height: 6),
-
-                // Tanggal
-                Row(
-                  children: [
-                    const Icon(Icons.calendar_today_outlined,
-                        size: 14, color: AppTheme.textSecondary),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Tanggal Pengajuan: ${permohonan.tanggalFormatted}',
-                      style: GoogleFonts.poppins(
-                          fontSize: 12, color: AppTheme.textSecondary),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: statusBg,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        p.status,
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: statusFg,
+                        ),
+                      ),
                     ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // ── Timeline card ──────────────────────────────────────────
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppTheme.surface,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppTheme.border),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Riwayat Status',
-                  style: GoogleFonts.poppins(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
                   ),
-                ),
-                const SizedBox(height: 12),
-                const Divider(height: 1, color: AppTheme.border),
-                const SizedBox(height: 16),
-
-                // Timeline items
-                ...List.generate(steps.length, (i) {
-                  return _buildTimelineItem(
-                    step: steps[i],
-                    isLast: i == steps.length - 1,
-                  );
-                }),
-              ],
+                  const SizedBox(height: 14),
+                  const Divider(height: 1, color: AppTheme.border),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_today_outlined,
+                          size: 14, color: AppTheme.textSecondary),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Tanggal Pengajuan: ${p.tanggalFormatted}',
+                        style: GoogleFonts.poppins(
+                            fontSize: 12, color: AppTheme.textSecondary),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+
+            // ── Timeline card ──────────────────────────────────────────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.surface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Riwayat Status',
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Divider(height: 1, color: AppTheme.border),
+                  const SizedBox(height: 16),
+
+                  if (_isLoading)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  else if (_errorMsg != null)
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.cloud_off_outlined,
+                              size: 40, color: AppTheme.border),
+                          const SizedBox(height: 8),
+                          Text(_errorMsg!,
+                              style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: AppTheme.textSecondary),
+                              textAlign: TextAlign.center),
+                          const SizedBox(height: 8),
+                          TextButton.icon(
+                            onPressed: _loadDetail,
+                            icon: const Icon(Icons.refresh, size: 14),
+                            label: Text('Coba lagi',
+                                style: GoogleFonts.poppins(fontSize: 12)),
+                          ),
+                        ],
+                      ),
+                    )
+                  else if (_steps == null || _steps!.isEmpty)
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Text(
+                          'Belum ada riwayat tersedia',
+                          style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: AppTheme.textSecondary),
+                        ),
+                      ),
+                    )
+                  else
+                    ...List.generate(_steps!.length, (i) {
+                      return _buildTimelineItem(
+                        step: _steps![i],
+                        isLast: i == _steps!.length - 1,
+                      );
+                    }),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // ── Single timeline item ─────────────────────────────────────────────────
+  // ── Single timeline item ────────────────────────────────────────────────
   Widget _buildTimelineItem({
     required _TimelineStep step,
     required bool isLast,
@@ -309,8 +356,6 @@ class PermohonanDetailScreen extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
-        // ── Left: icon + connecting line ─────────────────────────────
         SizedBox(
           width: 44,
           child: Column(
@@ -319,7 +364,9 @@ class PermohonanDetailScreen extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: step.iconBg.withOpacity(step.isActive ? 0.15 : 0.08),
+                  color: step.isActive
+                      ? step.iconBg.withValues(alpha: 0.15)
+                      : step.iconBg.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -341,17 +388,13 @@ class PermohonanDetailScreen extends StatelessWidget {
             ],
           ),
         ),
-
         const SizedBox(width: 12),
-
-        // ── Right: content ────────────────────────────────────────────
         Expanded(
           child: Padding(
             padding: EdgeInsets.only(bottom: isLast ? 0 : 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Title + timestamp on same row
                 Wrap(
                   crossAxisAlignment: WrapCrossAlignment.center,
                   spacing: 8,
@@ -377,8 +420,6 @@ class PermohonanDetailScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4),
-
-                // Description
                 Text(
                   step.description,
                   style: GoogleFonts.poppins(
@@ -389,8 +430,6 @@ class PermohonanDetailScreen extends StatelessWidget {
                     height: 1.4,
                   ),
                 ),
-
-                // Oleh [role]
                 if (step.oleh != null) ...[
                   const SizedBox(height: 3),
                   Text(
@@ -411,7 +450,7 @@ class PermohonanDetailScreen extends StatelessWidget {
     );
   }
 
-  // ── Status color helpers (mirrored from home_screen) ─────────────────────
+  // ── Status color helpers ────────────────────────────────────────────────
   Color _statusBgColor(String s) {
     switch (s) {
       case 'Menunggu Verifikasi': return const Color(0xFFFEF3C7);

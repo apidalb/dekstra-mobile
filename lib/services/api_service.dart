@@ -395,6 +395,17 @@ class ApiService {
   // Permohonan
   // ════════════════════════════════════════════════════════════════════════
 
+  /// Detail + timeline riwayat pengajuan milik warga
+  /// GET /riwayat-pengajuan/<nomor_permohonan>/
+  static Future<Map<String, dynamic>> getRiwayatPengajuanDetail(
+      String nomorPermohonan) async {
+    final res = await http.get(
+      Uri.parse('$kBaseUrl/riwayat-pengajuan/$nomorPermohonan/'),
+      headers: await _jsonHeaders(auth: true),
+    );
+    return _handleResponse(res);
+  }
+
   /// Riwayat pengajuan milik warga (status Disetujui / Ditolak)
   /// GET /riwayat-pengajuan/
   static Future<List<Map<String, dynamic>>> getRiwayatPengajuan() async {
