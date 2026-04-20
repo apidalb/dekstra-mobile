@@ -572,11 +572,15 @@ class _SuratStepperPageState extends State<SuratStepperPage> {
         content: Text(e.message, style: GoogleFonts.poppins(fontSize: 13)),
         backgroundColor: Colors.red.shade700,
       ));
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
+      final msg = e.toString().contains('SocketException') ||
+              e.toString().contains('Connection') ||
+              e.toString().contains('TimeoutException')
+          ? 'Gagal terhubung ke server. Periksa koneksi Anda.'
+          : 'Terjadi kesalahan: $e';
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Gagal terhubung ke server. Periksa koneksi Anda.',
-            style: GoogleFonts.poppins(fontSize: 13)),
+        content: Text(msg, style: GoogleFonts.poppins(fontSize: 13)),
         backgroundColor: Colors.red.shade700,
       ));
     } finally {

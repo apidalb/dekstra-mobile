@@ -67,14 +67,17 @@ class _SPBarangState extends State<SuratPengantarBarangScreen> {
     'pengantar_jenis_kelamin': _gJk,
     'pengantar_pekerjaan'    : _gPekCtrl.text,
     'pengantar_alamat'       : _gAlamatCtrl.text,
-    'asal_barang'            : _asalCtrl.text,
-    'tujuan_barang'          : _tujuanCtrl.text,
-    'no'                     : '1',
-    'jenis_barang'           : _jenisBarangCtrl.text,
-    'jumlah_barang'          : _jumlahBarangCtrl.text,
-    'jenis_kendaraan'        : _jenisKendaraanCtrl.text,
-    'nomor_polisi'           : _nopolCtrl.text,
-    'nama_supir'             : _supirCtrl.text,
+    'asal_barang'  : _asalCtrl.text,
+    'tujuan_barang': _tujuanCtrl.text,
+    'daftar_barang': [
+      {
+        'jenis_barang'   : _jenisBarangCtrl.text,
+        'jumlah_barang'  : _jumlahBarangCtrl.text,
+        'jenis_kendaraan': _jenisKendaraanCtrl.text,
+        'nomor_polisi'   : _nopolCtrl.text,
+        'nama_supir'     : _supirCtrl.text,
+      }
+    ],
   };
 
   Widget _buildPersonSection(String title,
