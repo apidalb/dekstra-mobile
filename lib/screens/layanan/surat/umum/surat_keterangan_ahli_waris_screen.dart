@@ -42,7 +42,7 @@ class _SKAhliWarisState extends State<SuratKeteranganAhliWarisScreen> {
 
   Future<Map<String, dynamic>> _buildPayload() async => {
     'daftar_ahli_waris': _daftarWaris.map((w) => {
-      'nama'         : w.namaCtrl.text,
+      'nama_lengkap' : w.namaCtrl.text,
       'nik'          : w.nikCtrl.text,
       'tempat_lahir' : w.tempatCtrl.text,
       'tanggal_lahir': ddmmyyyyToIso(w.tglCtrl.text),

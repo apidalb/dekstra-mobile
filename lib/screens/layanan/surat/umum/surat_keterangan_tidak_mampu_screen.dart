@@ -42,7 +42,7 @@ class _SKTMState extends State<SuratKeteranganTidakMampuScreen> {
   }
 
   Future<Map<String, dynamic>> _buildPayload() async => {
-    'nama_ortu'          : _namaOrtuCtrl.text,
+    'nama_orang_tua'     : _namaOrtuCtrl.text,
     'tempat_lahir_ortu'  : _tempatOrtuCtrl.text,
     'tanggal_lahir_ortu' : ddmmyyyyToIso(_tglOrtuCtrl.text),
     'kewarganegaraan'    : _kwrgCtrl.text,
@@ -53,7 +53,7 @@ class _SKTMState extends State<SuratKeteranganTidakMampuScreen> {
     'nama_anak'          : _namaAnakCtrl.text,
     'tempat_lahir_anak'  : _tempatAnakCtrl.text,
     'tanggal_lahir_anak' : ddmmyyyyToIso(_tglAnakCtrl.text),
-    'sekolah'            : _sekolahCtrl.text,
+    'asal_sekolah'       : _sekolahCtrl.text,
     'kelas'              : _kelasCtrl.text,
   };
 

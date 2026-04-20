@@ -20,6 +20,8 @@ class _IzinKeramaianState extends State<PermohonanIzinKeramaianScreen> {
   final _alamatCtrl    = TextEditingController();
 
   // Data Acara
+  final _namaAcaraCtrl    = TextEditingController();
+  final _jenisAcaraCtrl   = TextEditingController();
   String? _hari;
   final _tanggalAcaraCtrl = TextEditingController();
   final _tempatAcaraCtrl  = TextEditingController();
@@ -28,16 +30,18 @@ class _IzinKeramaianState extends State<PermohonanIzinKeramaianScreen> {
   @override
   void dispose() {
     for (final c in [_namaCtrl, _umurCtrl, _pekerjaanCtrl, _alamatCtrl,
-      _tanggalAcaraCtrl, _tempatAcaraCtrl, _keteranganCtrl]) { c.dispose(); }
+      _namaAcaraCtrl, _jenisAcaraCtrl, _tanggalAcaraCtrl, _tempatAcaraCtrl, _keteranganCtrl]) { c.dispose(); }
     super.dispose();
   }
 
   Future<Map<String, dynamic>> _buildPayload() async => {
-    'nama'         : _namaCtrl.text,
+    'nama_lengkap' : _namaCtrl.text,
     'umur'         : _umurCtrl.text,
     'pekerjaan'    : _pekerjaanCtrl.text,
     'alamat'       : _alamatCtrl.text,
-    'hari'         : _hari,
+    'nama_acara'   : _namaAcaraCtrl.text,
+    'jenis_acara'  : _jenisAcaraCtrl.text,
+    'hari_acara'   : _hari,
     'tanggal_acara': ddmmyyyyToIso(_tanggalAcaraCtrl.text),
     'tempat_acara' : _tempatAcaraCtrl.text,
     'keterangan'   : _keteranganCtrl.text,
@@ -92,6 +96,20 @@ class _IzinKeramaianState extends State<PermohonanIzinKeramaianScreen> {
       sectionCard(children: [
         sectionHeader('Data Acara'),
         const SizedBox(height: 16),
+        fieldLabel('Nama Acara', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _namaAcaraCtrl,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Contoh: Pernikahan, Syukuran, Khitanan'),
+          validator: (v) => validateRequired(v, 'Nama acara')),
+        const SizedBox(height: 14),
+        fieldLabel('Jenis Acara', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _jenisAcaraCtrl,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Contoh: Resepsi, Pengajian, Pesta'),
+          validator: (v) => validateRequired(v, 'Jenis acara')),
+        const SizedBox(height: 14),
         fieldLabel('Hari Acara', required: true),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(initialValue: _hari,

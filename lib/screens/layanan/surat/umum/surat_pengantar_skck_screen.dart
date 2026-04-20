@@ -42,7 +42,7 @@ class _SPSkckState extends State<SuratPengantarSkckScreen> {
     'agama'            : _agama,
     'tempat_lahir'     : _tempatCtrl.text,
     'tanggal_lahir'    : ddmmyyyyToIso(_tglCtrl.text),
-    'status_pernikahan': _status,
+    'status'           : _status,
     'pekerjaan'        : _pekerjaanCtrl.text,
     'alamat'           : _alamatCtrl.text,
     'keperluan'        : _keperluanCtrl.text,
