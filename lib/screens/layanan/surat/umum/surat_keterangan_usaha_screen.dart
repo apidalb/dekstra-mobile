@@ -25,6 +25,7 @@ class _SKUsahaState extends State<SuratKeteranganUsahaScreen> {
   final _alamatCtrl       = TextEditingController();
 
   // Data Usaha
+  final _noHpCtrl         = TextEditingController();
   final _namaUsahaCtrl    = TextEditingController();
   final _jenisUsahaCtrl   = TextEditingController();
   final _tujuanCtrl       = TextEditingController();
@@ -32,25 +33,26 @@ class _SKUsahaState extends State<SuratKeteranganUsahaScreen> {
   @override
   void dispose() {
     for (final c in [_nikCtrl, _namaCtrl, _tempatCtrl, _tglCtrl,
-      _pekerjaanCtrl, _alamatCtrl, _namaUsahaCtrl, _jenisUsahaCtrl, _tujuanCtrl]) {
+      _pekerjaanCtrl, _alamatCtrl, _noHpCtrl, _namaUsahaCtrl, _jenisUsahaCtrl, _tujuanCtrl]) {
       c.dispose();
     }
     super.dispose();
   }
 
   Future<Map<String, dynamic>> _buildPayload() async => {
-    'nik'           : _nikCtrl.text,
-    'nama_lengkap'  : _namaCtrl.text,
-    'tempat_lahir'  : _tempatCtrl.text,
-    'tanggal_lahir' : ddmmyyyyToIso(_tglCtrl.text),
-    'jenis_kelamin' : _jk,
-    'kewarganegaraan': _kwrg,
-    'agama'         : _agama,
-    'pekerjaan'     : _pekerjaanCtrl.text,
-    'alamat'        : _alamatCtrl.text,
-    'nama_usaha'    : _namaUsahaCtrl.text,
-    'jenis_usaha'   : _jenisUsahaCtrl.text,
-    'tujuan'        : _tujuanCtrl.text,
+    'nik'              : _nikCtrl.text,
+    'nama_lengkap'     : _namaCtrl.text,
+    'tempat_lahir'     : _tempatCtrl.text,
+    'tanggal_lahir'    : ddmmyyyyToIso(_tglCtrl.text),
+    'jenis_kelamin'    : _jk,
+    'kewarganegaraan'  : _kwrg,
+    'agama'            : _agama,
+    'pekerjaan'        : _pekerjaanCtrl.text,
+    'alamat'           : _alamatCtrl.text,
+    'no_hp'            : _noHpCtrl.text,
+    'nama_usaha'       : _namaUsahaCtrl.text,
+    'jenis_usaha'      : _jenisUsahaCtrl.text,
+    'tujuan_pengajuan' : _tujuanCtrl.text,
   };
 
   Widget _buildDataPemohon() => Form(
@@ -123,6 +125,14 @@ class _SKUsahaState extends State<SuratKeteranganUsahaScreen> {
           style: GoogleFonts.poppins(fontSize: 13),
           decoration: const InputDecoration(hintText: 'Masukkan pekerjaan'),
           validator: (v) => validateRequired(v, 'Pekerjaan')),
+        const SizedBox(height: 14),
+        fieldLabel('Nomor HP / WA', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _noHpCtrl,
+          keyboardType: TextInputType.phone,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan nomor HP/WA aktif'),
+          validator: (v) => validateRequired(v, 'Nomor HP/WA')),
         const SizedBox(height: 14),
         fieldLabel('Alamat', required: true),
         const SizedBox(height: 6),

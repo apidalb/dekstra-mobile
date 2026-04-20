@@ -14,7 +14,6 @@ class _SKTempatUsahaState extends State<SuratKeteranganTempatUsahaScreen> {
 
   // Data Pemohon
   final _namaCtrl   = TextEditingController();
-  final _nikCtrl    = TextEditingController();
   final _nibCtrl    = TextEditingController();
   final _npwpCtrl   = TextEditingController();
   final _alamatCtrl = TextEditingController();
@@ -27,21 +26,20 @@ class _SKTempatUsahaState extends State<SuratKeteranganTempatUsahaScreen> {
 
   @override
   void dispose() {
-    for (final c in [_namaCtrl, _nikCtrl, _nibCtrl, _npwpCtrl, _alamatCtrl,
+    for (final c in [_namaCtrl, _nibCtrl, _npwpCtrl, _alamatCtrl,
       _namaUsahaCtrl, _jenisUsahaCtrl, _alamatUsahaCtrl, _tujuanCtrl]) { c.dispose(); }
     super.dispose();
   }
 
   Future<Map<String, dynamic>> _buildPayload() async => {
-    'nama'          : _namaCtrl.text,
-    'nik'           : _nikCtrl.text,
-    'nib'           : _nibCtrl.text,
-    'npwp'          : _npwpCtrl.text,
-    'alamat_pemohon': _alamatCtrl.text,
-    'nama_usaha'    : _namaUsahaCtrl.text,
-    'jenis_usaha'   : _jenisUsahaCtrl.text,
-    'alamat_usaha'  : _alamatUsahaCtrl.text,
-    'tujuan'        : _tujuanCtrl.text,
+    'nama_lengkap'     : _namaCtrl.text,
+    'nib'              : _nibCtrl.text,
+    'npwp'             : _npwpCtrl.text,
+    'alamat'           : _alamatCtrl.text,
+    'nama_usaha'       : _namaUsahaCtrl.text,
+    'jenis_usaha'      : _jenisUsahaCtrl.text,
+    'alamat_usaha'     : _alamatUsahaCtrl.text,
+    'tujuan_pengajuan' : _tujuanCtrl.text,
   };
 
   Widget _buildDataPemohon() => Form(
@@ -50,14 +48,6 @@ class _SKTempatUsahaState extends State<SuratKeteranganTempatUsahaScreen> {
       sectionCard(children: [
         sectionHeader('Data Pemohon'),
         const SizedBox(height: 16),
-        fieldLabel('NIK', required: true),
-        const SizedBox(height: 6),
-        TextFormField(controller: _nikCtrl,
-          keyboardType: TextInputType.number, inputFormatters: nikFormatters,
-          style: GoogleFonts.poppins(fontSize: 13),
-          decoration: const InputDecoration(hintText: 'Masukkan 16 digit NIK'),
-          validator: validateNIK),
-        const SizedBox(height: 14),
         fieldLabel('Nama Lengkap', required: true),
         const SizedBox(height: 6),
         TextFormField(controller: _namaCtrl,
