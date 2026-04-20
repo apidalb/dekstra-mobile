@@ -131,9 +131,18 @@ class _PermohonanDetailScreenState extends State<PermohonanDetailScreen> {
   bool _isLoading = true;
   String? _errorMsg;
 
+  late String _jenisSurat;
+  late String _status;
+  late String _nomorPermohonan;
+  late DateTime _tanggal;
+
   @override
   void initState() {
     super.initState();
+    _jenisSurat       = widget.permohonan.jenisSurat;
+    _status           = widget.permohonan.status;
+    _nomorPermohonan  = widget.permohonan.nomorPermohonan;
+    _tanggal          = widget.permohonan.tanggal;
     _loadDetail();
   }
 
@@ -147,8 +156,20 @@ class _PermohonanDetailScreenState extends State<PermohonanDetailScreen> {
     try {
       final data    = await ApiService.getRiwayatPengajuanDetail(nomor);
       final riwayat = data['riwayat'] as List<dynamic>;
+      final rawStatus = data['status'] as int;
+      final statusStr = switch (rawStatus) {
+        1 => 'Menunggu Verifikasi',
+        2 => 'Ditolak',
+        3 => 'Disetujui',
+        _ => 'Tidak Diketahui',
+      };
       if (mounted) {
         setState(() {
+          _jenisSurat      = (data['jenis_surat'] as Map<String, dynamic>)['nama'] as String;
+          _status          = statusStr;
+          _nomorPermohonan = data['nomor_permohonan'] as String? ?? _nomorPermohonan;
+          final diajukanAt = data['diajukan_at'] as String?;
+          if (diajukanAt != null) _tanggal = DateTime.parse(diajukanAt);
           _steps = riwayat
               .map((r) => _stepFromApi(r as Map<String, dynamic>))
               .toList();
@@ -162,11 +183,13 @@ class _PermohonanDetailScreenState extends State<PermohonanDetailScreen> {
     }
   }
 
+  String get _tanggalFormatted =>
+      '${_tanggal.year}-${_tanggal.month.toString().padLeft(2, '0')}-${_tanggal.day.toString().padLeft(2, '0')}';
+
   @override
   Widget build(BuildContext context) {
-    final p         = widget.permohonan;
-    final statusBg  = _statusBgColor(p.status);
-    final statusFg  = _statusFgColor(p.status);
+    final statusBg  = _statusBgColor(_status);
+    final statusFg  = _statusFgColor(_status);
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -197,7 +220,7 @@ class _PermohonanDetailScreenState extends State<PermohonanDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    p.jenisSurat,
+                    _jenisSurat.isNotEmpty ? _jenisSurat : 'Memuat...',
                     style: GoogleFonts.poppins(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
@@ -206,9 +229,7 @@ class _PermohonanDetailScreenState extends State<PermohonanDetailScreen> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    p.nomorPermohonan.isNotEmpty
-                        ? '#${p.nomorPermohonan}'
-                        : '#${p.id}',
+                    _nomorPermohonan.isNotEmpty ? '#$_nomorPermohonan' : '',
                     style: GoogleFonts.poppins(
                       fontSize: 13,
                       color: AppTheme.textSecondary,
@@ -237,7 +258,7 @@ class _PermohonanDetailScreenState extends State<PermohonanDetailScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        p.status,
+                        _status,
                         style: GoogleFonts.poppins(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -255,7 +276,7 @@ class _PermohonanDetailScreenState extends State<PermohonanDetailScreen> {
                           size: 14, color: AppTheme.textSecondary),
                       const SizedBox(width: 6),
                       Text(
-                        'Tanggal Pengajuan: ${p.tanggalFormatted}',
+                        'Tanggal Pengajuan: $_tanggalFormatted',
                         style: GoogleFonts.poppins(
                             fontSize: 12, color: AppTheme.textSecondary),
                       ),

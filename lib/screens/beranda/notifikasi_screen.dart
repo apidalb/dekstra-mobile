@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
 import '../../services/api_service.dart';
+import '../beranda/home_screen.dart';
+import '../beranda/permohonan_detail_screen.dart';
 
 // ── Model ─────────────────────────────────────────────────────────────────────
 class NotifikasiModel {
@@ -12,6 +14,7 @@ class NotifikasiModel {
   bool sudahDibaca;
   final DateTime createdAt;
   final int? permohonanId;
+  final String? nomorPermohonan;
 
   NotifikasiModel({
     required this.id,
@@ -21,17 +24,19 @@ class NotifikasiModel {
     required this.sudahDibaca,
     required this.createdAt,
     this.permohonanId,
+    this.nomorPermohonan,
   });
 
   factory NotifikasiModel.fromJson(Map<String, dynamic> json) {
     return NotifikasiModel(
-      id:           json['id'] as int,
-      tipe:         json['tipe'] as int,
-      judul:        json['judul'] as String,
-      pesan:        json['pesan'] as String,
-      sudahDibaca:  json['sudah_dibaca'] as bool,
-      createdAt:    DateTime.parse(json['created_at'] as String).toLocal(),
-      permohonanId: json['permohonan'] as int?,
+      id:               json['id'] as int,
+      tipe:             json['tipe'] as int,
+      judul:            json['judul'] as String,
+      pesan:            json['pesan'] as String,
+      sudahDibaca:      json['sudah_dibaca'] as bool,
+      createdAt:        DateTime.parse(json['created_at'] as String).toLocal(),
+      permohonanId:     json['permohonan'] as int?,
+      nomorPermohonan:  json['nomor_permohonan'] as String?,
     );
   }
 }
@@ -112,12 +117,26 @@ class _NotifikasiScreenState extends State<NotifikasiScreen> {
 
   int get _unreadCount => _list.where((n) => !n.sudahDibaca).length;
 
-  Future<void> _markRead(NotifikasiModel notif) async {
-    if (notif.sudahDibaca) return;
-    try {
-      await ApiService.markNotifikasiRead(notif.id);
-      if (mounted) setState(() => notif.sudahDibaca = true);
-    } catch (_) {}
+  Future<void> _onTapNotif(NotifikasiModel notif) async {
+    if (!notif.sudahDibaca) {
+      try {
+        await ApiService.markNotifikasiRead(notif.id);
+        if (mounted) setState(() => notif.sudahDibaca = true);
+      } catch (_) {}
+    }
+    final nomor = notif.nomorPermohonan;
+    if (nomor == null || nomor.isEmpty) return;
+    if (!mounted) return;
+    final stub = Permohonan(
+      id: 0,
+      nomorPermohonan: nomor,
+      jenisSurat: '',
+      tanggal: DateTime.now(),
+      status: 'Menunggu Verifikasi',
+    );
+    Navigator.push(context, MaterialPageRoute(
+      builder: (_) => PermohonanDetailScreen(permohonan: stub),
+    ));
   }
 
   Future<void> _bacaSemua() async {
@@ -242,7 +261,7 @@ class _NotifikasiScreenState extends State<NotifikasiScreen> {
                                 final notif = _list[i];
                                 return _NotifTile(
                                   notif: notif,
-                                  onTap: () => _markRead(notif),
+                                  onTap: () => _onTapNotif(notif),
                                 );
                               },
                             ),

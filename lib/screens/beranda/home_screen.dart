@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
@@ -197,12 +198,17 @@ class _BerandaTabState extends State<_BerandaTab> {
 
   // ── Notifikasi ────────────────────────────────────────────────────────────
   List<NotifikasiModel> _notifList = [];
+  Timer? _notifTimer;
 
   @override
   void initState() {
     super.initState();
     _loadPermohonan();
     _loadNotifikasi();
+    _notifTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _loadNotifikasi(),
+    );
   }
 
   Future<void> _loadNotifikasi() async {
@@ -274,7 +280,14 @@ class _BerandaTabState extends State<_BerandaTab> {
   }
 
   // ── Notif overlay ──────────────────────────────────────────────────────────
-  void _toggleNotif() => _notifOpen ? _closeNotif() : _openNotif();
+  Future<void> _toggleNotif() async {
+    if (_notifOpen) {
+      _closeNotif();
+    } else {
+      await _loadNotifikasi();
+      _openNotif();
+    }
+  }
 
   void _openNotif() {
     final box = _notifKey.currentContext!.findRenderObject() as RenderBox;
@@ -582,6 +595,7 @@ class _BerandaTabState extends State<_BerandaTab> {
 
   @override
   void dispose() {
+    _notifTimer?.cancel();
     _closeNotif();
     super.dispose();
   }
@@ -1045,13 +1059,28 @@ class _NotifPanelState extends State<_NotifPanel> {
     _items = List.from(widget.initialItems);
   }
 
-  Future<void> _markRead(NotifikasiModel notif) async {
-    if (notif.sudahDibaca) return;
-    try {
-      await ApiService.markNotifikasiRead(notif.id);
-      if (mounted) setState(() => notif.sudahDibaca = true);
-      widget.onMarkReadDone();
-    } catch (_) {}
+  Future<void> _onTapNotif(NotifikasiModel notif) async {
+    if (!notif.sudahDibaca) {
+      try {
+        await ApiService.markNotifikasiRead(notif.id);
+        if (mounted) setState(() => notif.sudahDibaca = true);
+        widget.onMarkReadDone();
+      } catch (_) {}
+    }
+    final nomor = notif.nomorPermohonan;
+    if (nomor == null || nomor.isEmpty) return;
+    if (!mounted) return;
+    final stub = Permohonan(
+      id: 0,
+      nomorPermohonan: nomor,
+      jenisSurat: '',
+      tanggal: DateTime.now(),
+      status: 'Menunggu Verifikasi',
+    );
+    widget.onClose();
+    Navigator.push(context, MaterialPageRoute(
+      builder: (_) => PermohonanDetailScreen(permohonan: stub),
+    ));
   }
 
   @override
@@ -1103,7 +1132,7 @@ class _NotifPanelState extends State<_NotifPanel> {
                         const Divider(height: 1, color: AppTheme.border),
                     itemBuilder: (_, i) => _NotifItem(
                       notif: _items[i],
-                      onTap: () => _markRead(_items[i]),
+                      onTap: () => _onTapNotif(_items[i]),
                     ),
                   ),
                 ),
