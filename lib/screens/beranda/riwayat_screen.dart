@@ -4,7 +4,7 @@ import '../../theme/app_theme.dart';
 import '../../services/api_service.dart';
 import 'home_screen.dart';
 
-// RiwayatScreen — menampilkan permohonan dengan status Disetujui atau Ditolak
+// RiwayatScreen — menampilkan permohonan dengan status Selesai atau Ditolak
 class RiwayatScreen extends StatefulWidget {
   const RiwayatScreen({super.key});
 
@@ -13,7 +13,7 @@ class RiwayatScreen extends StatefulWidget {
 }
 
 class _RiwayatScreenState extends State<RiwayatScreen> {
-  static const _riwayatStatuses = {'Disetujui', 'Ditolak'};
+  static const _riwayatStatuses = {'Selesai', 'Ditolak'};
 
   String _searchQuery        = '';
   String? _filterStatus;

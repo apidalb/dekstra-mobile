@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../theme/app_theme.dart';
 import '../../services/api_service.dart';
 import 'home_screen.dart';
@@ -135,6 +136,7 @@ class _PermohonanDetailScreenState extends State<PermohonanDetailScreen> {
   late String _status;
   late String _nomorPermohonan;
   late DateTime _tanggal;
+  String? _dokumenToken;
 
   @override
   void initState() {
@@ -160,7 +162,7 @@ class _PermohonanDetailScreenState extends State<PermohonanDetailScreen> {
       final statusStr = switch (rawStatus) {
         1 => 'Menunggu Verifikasi',
         2 => 'Ditolak',
-        3 => 'Disetujui',
+        3 => 'Selesai',
         _ => 'Tidak Diketahui',
       };
       if (mounted) {
@@ -168,6 +170,7 @@ class _PermohonanDetailScreenState extends State<PermohonanDetailScreen> {
           _jenisSurat      = (data['jenis_surat'] as Map<String, dynamic>)['nama'] as String;
           _status          = statusStr;
           _nomorPermohonan = data['nomor_permohonan'] as String? ?? _nomorPermohonan;
+          _dokumenToken    = data['dokumen_token'] as String?;
           final diajukanAt = data['diajukan_at'] as String?;
           if (diajukanAt != null) _tanggal = DateTime.parse(diajukanAt);
           _steps = riwayat
@@ -185,6 +188,19 @@ class _PermohonanDetailScreenState extends State<PermohonanDetailScreen> {
 
   String get _tanggalFormatted =>
       '${_tanggal.year}-${_tanggal.month.toString().padLeft(2, '0')}-${_tanggal.day.toString().padLeft(2, '0')}';
+
+  Future<void> _downloadDokumen() async {
+    final token = _dokumenToken;
+    if (token == null) return;
+    final uri = Uri.parse('$kBaseUrl/berkas/$token');
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal membuka dokumen')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -363,6 +379,33 @@ class _PermohonanDetailScreenState extends State<PermohonanDetailScreen> {
                 ],
               ),
             ),
+
+            // ── Tombol download dokumen final ─────────────────────────
+            if (_status == 'Selesai' && _dokumenToken != null) ...[
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _downloadDokumen,
+                  icon: const Icon(Icons.download_outlined, size: 20),
+                  label: Text(
+                    'Unduh Dokumen',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -475,7 +518,7 @@ class _PermohonanDetailScreenState extends State<PermohonanDetailScreen> {
   Color _statusBgColor(String s) {
     switch (s) {
       case 'Menunggu Verifikasi': return const Color(0xFFFEF3C7);
-      case 'Disetujui':           return const Color(0xFFD1FAE5);
+      case 'Selesai':             return const Color(0xFFD1FAE5);
       case 'Ditolak':             return const Color(0xFFFFE4E6);
       default:                    return AppTheme.primaryLight;
     }
@@ -484,7 +527,7 @@ class _PermohonanDetailScreenState extends State<PermohonanDetailScreen> {
   Color _statusFgColor(String s) {
     switch (s) {
       case 'Menunggu Verifikasi': return const Color(0xFFD97706);
-      case 'Disetujui':           return const Color(0xFF059669);
+      case 'Selesai':             return const Color(0xFF059669);
       case 'Ditolak':             return const Color(0xFFE11D48);
       default:                    return AppTheme.primary;
     }

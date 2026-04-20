@@ -33,7 +33,7 @@ class Permohonan {
     final statusStr = switch (statusInt) {
       1 => 'Menunggu Verifikasi',
       2 => 'Ditolak',
-      3 => 'Disetujui',
+      3 => 'Selesai',
       _ => 'Tidak Diketahui',
     };
     final diajukanAt = json['diajukan_at'];
@@ -52,7 +52,7 @@ class Permohonan {
 
 const List<String> allStatuses = [
   'Menunggu Verifikasi',
-  'Disetujui',
+  'Selesai',
   'Ditolak',
 ];
 
@@ -60,7 +60,7 @@ const List<String> allStatuses = [
 Color statusBg(String s) {
   switch (s) {
     case 'Menunggu Verifikasi': return const Color(0xFFFEF3C7);
-    case 'Disetujui':           return const Color(0xFFD1FAE5);
+    case 'Selesai':             return const Color(0xFFD1FAE5);
     case 'Ditolak':             return const Color(0xFFFFE4E6);
     default:                    return AppTheme.primaryLight;
   }
@@ -69,7 +69,7 @@ Color statusBg(String s) {
 Color statusColor(String s) {
   switch (s) {
     case 'Menunggu Verifikasi': return const Color(0xFFD97706);
-    case 'Disetujui':           return const Color(0xFF059669);
+    case 'Selesai':             return const Color(0xFF059669);
     case 'Ditolak':             return const Color(0xFFE11D48);
     default:                    return AppTheme.primary;
   }
