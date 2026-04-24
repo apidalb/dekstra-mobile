@@ -47,20 +47,29 @@ class _KtpState extends State<FormulirKtpScreen> {
     super.dispose();
   }
 
+  // mapping label → nilai backend untuk jenis_permohonan_ktp
+  static const _jenisKtpMap = {
+    'KTP Baru'         : 'baru',
+    'Perpanjangan KTP' : 'perpanjangan',
+    'KTP Hilang'       : 'penggantian',
+    'KTP Rusak'        : 'penggantian',
+    'KTP Luar Domisili': 'baru',
+  };
+
   Future<Map<String, dynamic>> _buildPayload() async => {
-    'provinsi'      : _provCtrl.text,
-    'kabupaten_kota': _kabCtrl.text,
-    'kecamatan'     : _kecCtrl.text,
-    'desa_kelurahan': _desaCtrl.text,
-    'jenis_ktp'     : _jenisKtp,
-    'nama_lengkap'  : _namaCtrl.text,
-    'nik'           : _nikCtrl.text,
-    'no_kk'         : _noKkCtrl.text,
-    'no_telepon'    : _noTelpCtrl.text,
-    'alamat'        : _alamatCtrl.text,
-    'rt'            : _rtCtrl.text,
-    'rw'            : _rwCtrl.text,
-    'kode_pos'      : _kodeCtrl.text,
+    'nama_provinsi'       : _provCtrl.text,
+    'nama_kabupaten_kota' : _kabCtrl.text,
+    'nama_kecamatan'      : _kecCtrl.text,
+    'nama_kelurahan_desa' : _desaCtrl.text,
+    'jenis_permohonan_ktp': _jenisKtpMap[_jenisKtp] ?? 'baru',
+    'nama_lengkap'        : _namaCtrl.text,
+    'nik'                 : _nikCtrl.text,
+    'nomor_kk'            : _noKkCtrl.text,
+    'nomor_telepon'       : _noTelpCtrl.text,
+    'alamat'              : _alamatCtrl.text,
+    'rt'                  : _rtCtrl.text,
+    'rw'                  : _rwCtrl.text,
+    'kode_pos'            : _kodeCtrl.text,
   };
 
   Widget _buildDataWilayahStep() => Form(

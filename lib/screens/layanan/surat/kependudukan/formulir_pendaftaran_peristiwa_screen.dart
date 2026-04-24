@@ -3,24 +3,41 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../theme/app_theme.dart';
 import '../form_surat_helpers.dart';
 
+// pasangan: [label UI, backend key]
 const _persyaratanF102 = [
-  'KK Lama / KK Rusak',
-  'Buku Nikah / Kutipan Akta Perkawinan',
-  'Kutipan Akta Perceraian',
-  'Surat Keterangan Pindah',
-  'Surat Keterangan Pindah Luar Negeri',
-  'KTP-el Rusak',
-  'Dokumen Perjalanan',
-  'Surat Keterangan Hilang dari Kepolisian',
-  'Surat Keterangan / Bukti Perubahan Peristiwa Kependudukan',
-  'SPTJM Perkawinan / Perceraian Belum Tercatat',
-  'Akta Kematian',
-  'Surat Pernyataan Penyebab Terjadinya Hilang atau Rusak',
-  'Surat Keterangan Pindah dari Perwakilan RI',
-  'Surat Pernyataan Bersedia Menerima sebagai Anggota Keluarga',
-  'Surat Kuasa Pengasuh Anak dari Orang Tua / Wali',
-  'Kartu Izin Tinggal Tetap',
+  ['KK Lama / KK Rusak',                                         'lampiran_kk_lama'],
+  ['Buku Nikah / Kutipan Akta Perkawinan',                       'lampiran_buku_nikah'],
+  ['Kutipan Akta Perceraian',                                    'lampiran_akta_perceraian'],
+  ['Surat Keterangan Pindah',                                    'lampiran_surat_pindah'],
+  ['Surat Keterangan Pindah Luar Negeri',                        'lampiran_surat_pindah_luar_negeri'],
+  ['KTP-el Rusak',                                               'lampiran_ktp_rusak'],
+  ['Dokumen Perjalanan',                                         'lampiran_dokumen_perjalanan'],
+  ['Surat Keterangan Hilang dari Kepolisian',                    'lampiran_surat_keterangan_hilang'],
+  ['Surat Keterangan / Bukti Perubahan Peristiwa Kependudukan',  'lampiran_surat_keterangan_perubahan'],
+  ['SPTJM Perkawinan / Perceraian Belum Tercatat',               'lampiran_sptjm'],
+  ['Akta Kematian',                                              'lampiran_akta_kematian'],
+  ['Surat Pernyataan Penyebab Terjadinya Hilang atau Rusak',     'lampiran_surat_pernyataan_hilang_rusak'],
+  ['Surat Keterangan Pindah dari Perwakilan RI',                 'lampiran_surat_pindah_perwakilan_ri'],
+  ['Surat Pernyataan Bersedia Menerima sebagai Anggota Keluarga','lampiran_surat_pernyataan_anggota'],
+  ['Surat Kuasa Pengasuh Anak dari Orang Tua / Wali',            'lampiran_surat_kuasa_pengasuhan'],
+  ['Kartu Izin Tinggal Tetap',                                   'lampiran_kartu_izin_tinggal_tetap'],
 ];
+
+// mapping label kategori → {kategori_permohonan, jenis_*}
+const _kategoriBackendMap = <String, Map<String, String>>{
+  'KK Baru'                        : {'kategori_permohonan': 'kartu-keluarga', 'jenis_kk': 'kk-baru-membentuk-keluarga'},
+  'Perubahan Data KK'              : {'kategori_permohonan': 'kartu-keluarga', 'jenis_kk': 'kk-ubah-elemen-data'},
+  'KK Hilang / Rusak'              : {'kategori_permohonan': 'kartu-keluarga', 'jenis_kk': 'kk-hilang'},
+  'KTP-el Baru'                    : {'kategori_permohonan': 'ktp-el',         'jenis_ktp': 'ktp-baru'},
+  'KTP-el Pindah Datang'           : {'kategori_permohonan': 'ktp-el',         'jenis_ktp': 'ktp-pindah-datang'},
+  'KTP-el Hilang / Rusak'          : {'kategori_permohonan': 'ktp-el',         'jenis_ktp': 'ktp-hilang'},
+  'KTP-el Perpanjangan ITAP'       : {'kategori_permohonan': 'ktp-el',         'jenis_ktp': 'ktp-perpanjangan-itap'},
+  'Kartu Identitas Anak (KIA) Baru': {'kategori_permohonan': 'kia',            'jenis_kia': 'kia-baru'},
+  'KIA Hilang'                     : {'kategori_permohonan': 'kia',            'jenis_kia': 'kia-hilang'},
+  'KIA Rusak'                      : {'kategori_permohonan': 'kia',            'jenis_kia': 'kia-rusak'},
+  'Perubahan Data'                 : {'kategori_permohonan': 'perubahan-data', 'jenis_perubahan_data': 'ubah-kk'},
+  'Lainnya'                        : {'kategori_permohonan': 'kartu-keluarga'},
+};
 
 const _kategoriF102 = [
   'KK Baru', 'Perubahan Data KK', 'KK Hilang / Rusak',
@@ -55,13 +72,20 @@ class _F102State extends State<FormulirPendaftaranPeristiwaScreen> {
     super.dispose();
   }
 
-  Future<Map<String, dynamic>> _buildPayload() async => {
-    'nama'     : _namaCtrl.text,
-    'nik'      : _nikCtrl.text,
-    'no_kk'    : _noKkCtrl.text,
-    'no_hp'    : _noHpCtrl.text,
-    'kategori' : _kategori,
-  };
+  Future<Map<String, dynamic>> _buildPayload() async {
+    final backendKategori = _kategoriBackendMap[_kategori] ?? {};
+    final payload = <String, dynamic>{
+      'nama_lengkap' : _namaCtrl.text,
+      'nik'          : _nikCtrl.text,
+      'nomor_kk'     : _noKkCtrl.text,
+      'nomor_hp_wa'  : _noHpCtrl.text,
+      ...backendKategori,
+    };
+    for (final pair in _persyaratanF102) {
+      payload[pair[1]] = _checkedPersyaratan.contains(pair[0]);
+    }
+    return payload;
+  }
 
   Widget _buildDataPemohon() => Form(
     key: _fk1,
@@ -130,16 +154,16 @@ class _F102State extends State<FormulirPendaftaranPeristiwaScreen> {
       Text('Centang persyaratan yang akan dilampirkan',
           style: GoogleFonts.poppins(fontSize: 12, color: AppTheme.textSecondary)),
       const SizedBox(height: 8),
-      ..._persyaratanF102.map((item) => CheckboxListTile(
-        value: _checkedPersyaratan.contains(item),
+      ..._persyaratanF102.map((pair) => CheckboxListTile(
+        value: _checkedPersyaratan.contains(pair[0]),
         onChanged: (v) => setState(() {
           if (v == true) {
-            _checkedPersyaratan.add(item);
+            _checkedPersyaratan.add(pair[0]);
           } else {
-            _checkedPersyaratan.remove(item);
+            _checkedPersyaratan.remove(pair[0]);
           }
         }),
-        title: Text(item,
+        title: Text(pair[0],
             style: GoogleFonts.poppins(fontSize: 12, color: AppTheme.textPrimary)),
         activeColor: AppTheme.primary,
         controlAffinity: ListTileControlAffinity.leading,

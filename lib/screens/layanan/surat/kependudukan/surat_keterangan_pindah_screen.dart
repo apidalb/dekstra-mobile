@@ -27,6 +27,7 @@ class _PindahState extends State<SuratKeteranganPindahScreen> {
   final _tempatCtrl        = TextEditingController();
   final _tglCtrl           = TextEditingController();
   String? _jk;
+  String? _agama;
   final _pekerjaanCtrl     = TextEditingController();
   String? _status;
   String? _kwrg;
@@ -44,26 +45,32 @@ class _PindahState extends State<SuratKeteranganPindahScreen> {
     super.dispose();
   }
 
-  Future<Map<String, dynamic>> _buildPayload() async => {
-    'nama_lengkap'    : _namaCtrl.text,
-    'nik'             : _nikCtrl.text,
-    'no_kk'           : _noKkCtrl.text,
-    'tempat_lahir'    : _tempatCtrl.text,
-    'tanggal_lahir'   : ddmmyyyyToIso(_tglCtrl.text),
-    'jenis_kelamin'   : _jk,
-    'pekerjaan'       : _pekerjaanCtrl.text,
-    'status_pernikahan': _status,
-    'kewarganegaraan' : _kwrg,
-    'alamat_asal'     : _alamatCtrl.text,
-    'alamat_tujuan'   : _alamatTujuanCtrl.text,
-    'alasan_pindah'   : _alasan,
-    'anggota_pindah'  : _anggota.map((a) => {
-      'nik'          : a.nikCtrl.text,
-      'nama'         : a.namaCtrl.text,
-      'jenis_kelamin': a.jk,
-      'shdk'         : a.shdk,
-    }).toList(),
-  };
+  Future<Map<String, dynamic>> _buildPayload() async {
+    final payload = <String, dynamic>{
+      'nama_lengkap'  : _namaCtrl.text,
+      'nik'           : _nikCtrl.text,
+      'no_kk'         : _noKkCtrl.text,
+      'tempat_lahir'  : _tempatCtrl.text,
+      'tanggal_lahir' : ddmmyyyyToIso(_tglCtrl.text),
+      'jenis_kelamin' : _jk,
+      'agama'         : _agama,
+      'pekerjaan'     : _pekerjaanCtrl.text,
+      'status'        : _status,
+      'kewarganegaraan': _kwrg,
+      'alamat'        : _alamatCtrl.text,
+      'alasan'        : _alasan,
+      'jumlah_pindah' : _anggota.length.toString(),
+    };
+    for (var i = 0; i < 6; i++) {
+      final slot = i + 1;
+      final a = i < _anggota.length ? _anggota[i] : null;
+      payload['nik_$slot']          = a?.nikCtrl.text ?? '';
+      payload['nama_lengkap_$slot'] = a?.namaCtrl.text ?? '';
+      payload['jenis_kelamin_$slot'] = a?.jk ?? '';
+      payload['shdk_$slot']         = a?.shdk ?? '';
+    }
+    return payload;
+  }
 
   Widget _buildDataPemohon() => Form(
     key: _fk1,
@@ -122,6 +129,15 @@ class _PindahState extends State<SuratKeteranganPindahScreen> {
               child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
           onChanged: (v) => setState(() => _jk = v),
           validator: (v) => v == null ? 'Wajib dipilih' : null),
+        const SizedBox(height: 14),
+        fieldLabel('Agama', required: true),
+        const SizedBox(height: 6),
+        DropdownButtonFormField<String>(initialValue: _agama,
+          decoration: dropdownDeco('Pilih agama'),
+          items: kAgamaList.map((e) => DropdownMenuItem(value: e,
+              child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
+          onChanged: (v) => setState(() => _agama = v),
+          validator: (v) => v == null ? 'Agama wajib dipilih' : null),
         const SizedBox(height: 14),
         fieldLabel('Pekerjaan', required: true),
         const SizedBox(height: 6),

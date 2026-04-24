@@ -39,11 +39,11 @@ class _DomisiliState extends State<SuratKeteranganDomisiliScreen> {
     'jenis_kelamin' : _jk,
     'agama'         : _agama,
     'pekerjaan'     : _pekerjaanCtrl.text,
-    'status_pernikahan': _status,
+    'status'         : _status,
     'kewarganegaraan': _kwrg,
-    'alamat'        : _alamatCtrl.text,
-    'no_kk'         : _noKkCtrl.text,
-    'nama_kepala_kk': _kepalaKkCtrl.text,
+    'alamat'         : _alamatCtrl.text,
+    'no_kk'          : _noKkCtrl.text,
+    'nama_kepala_keluarga': _kepalaKkCtrl.text,
   };
 
   Widget _buildDataPemohon() => Form(

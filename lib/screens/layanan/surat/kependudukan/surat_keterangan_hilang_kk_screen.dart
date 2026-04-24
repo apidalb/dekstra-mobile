@@ -37,7 +37,7 @@ class _HilangKkState extends State<SuratKeteranganHilangKkScreen> {
     'agama'        : _agama,
     'pekerjaan'    : _pekerjaanCtrl.text,
     'alamat'       : _alamatCtrl.text,
-    'no_kk'        : _noKkCtrl.text,
+    'nomor_kk'     : _noKkCtrl.text,
   };
 
   Widget _buildDataPemohon() => Form(

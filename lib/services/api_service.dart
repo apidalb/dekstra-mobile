@@ -8,12 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 final homeTabIndex = ValueNotifier<int>(0);
 
 // ── Base URL ──────────────────────────────────────────────────────────────────
-// Flutter Web (Chrome) : backend di localhost karena browser & server sama-sama di PC
-// Android emulator     : 10.0.2.2 = alamat host machine dari dalam emulator
-// Perangkat fisik      : ganti dengan IP LAN PC, contoh: 192.168.1.5
-// Production           : ganti dengan domain HTTPS
-final String kBaseUrl =
-    kIsWeb ? 'http://localhost:8000' : 'http://10.0.2.2:8000';
+const String kBaseUrl = 'https://dekstra-capstone.site';
 
 // ════════════════════════════════════════════════════════════════════════════
 // Token storage helpers

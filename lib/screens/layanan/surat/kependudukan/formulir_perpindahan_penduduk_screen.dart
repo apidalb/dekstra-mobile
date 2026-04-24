@@ -3,12 +3,13 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../theme/app_theme.dart';
 import '../form_surat_helpers.dart';
 
+// pasangan: [label UI, nilai backend jenis_perpindahan]
 const _klarifikasiList = [
-  'Dalam satu Desa/Kelurahan',
-  'Antar Desa/Kelurahan dalam satu Kecamatan',
-  'Antar Kecamatan dalam satu Kabupaten/Kota',
-  'Antar Kabupaten/Kota dalam satu Provinsi',
-  'Antar Provinsi',
+  ['Dalam satu Desa/Kelurahan',                 'dalam-desa-kelurahan'],
+  ['Antar Desa/Kelurahan (satu Kecamatan)',      'antar-desa-kelurahan'],
+  ['Antar Kecamatan (satu Kab/Kota)',            'antar-kecamatan'],
+  ['Antar Kabupaten/Kota (satu Provinsi)',       'antar-kabupaten-kota'],
+  ['Antar Provinsi',                             'antar-provinsi'],
 ];
 
 class _AnggotaF103 {
@@ -74,32 +75,29 @@ class _F103State extends State<FormulirPerpindahanPendudukScreen> {
   }
 
   Future<Map<String, dynamic>> _buildPayload() async => {
-    'no_kk'          : _noKkCtrl.text,
-    'nama_pemohon'   : _namaCtrl.text,
-    'nik'            : _nikCtrl.text,
-    'no_hp'          : _noHpCtrl.text,
-    'alamat_asal'    : _alamatAsalCtrl.text,
-    'rt_asal'        : _rtAsalCtrl.text,
-    'rw_asal'        : _rwAsalCtrl.text,
-    'desa_asal'      : _desaAsalCtrl.text,
-    'kecamatan_asal' : _kecAsalCtrl.text,
-    'kabupaten_asal' : _kabAsalCtrl.text,
-    'provinsi_asal'  : _provAsalCtrl.text,
-    'kode_pos_asal'  : _kodeAsalCtrl.text,
-    'klarifikasi'    : _klarifikasi,
-    'alamat_tujuan'  : _alamatTujCtrl.text,
-    'rt_tujuan'      : _rtTujCtrl.text,
-    'rw_tujuan'      : _rwTujCtrl.text,
-    'desa_tujuan'    : _desaTujCtrl.text,
-    'kecamatan_tujuan': _kecTujCtrl.text,
-    'kabupaten_tujuan': _kabTujCtrl.text,
-    'provinsi_tujuan': _provTujCtrl.text,
-    'kode_pos_tujuan': _kodeTujCtrl.text,
-    'alasan_pindah'  : _alasan,
-    'anggota_pindah' : _anggota.map((a) => {
-      'nik' : a.nikCtrl.text,
-      'nama': a.namaCtrl.text,
-      'shdk': a.shdk,
+    'nomor_kk'            : _noKkCtrl.text,
+    'nama_lengkap'        : _namaCtrl.text,
+    'nik'                 : _nikCtrl.text,
+    'asal_rt'             : _rtAsalCtrl.text,
+    'asal_rw'             : _rwAsalCtrl.text,
+    'asal_desa_kelurahan' : _desaAsalCtrl.text,
+    'asal_kecamatan'      : _kecAsalCtrl.text,
+    'asal_kabupaten_kota' : _kabAsalCtrl.text,
+    'asal_provinsi'       : _provAsalCtrl.text,
+    'asal_kode_pos'       : _kodeAsalCtrl.text,
+    'jenis_perpindahan'   : _klarifikasi,
+    'tujuan_rt'           : _rtTujCtrl.text,
+    'tujuan_rw'           : _rwTujCtrl.text,
+    'tujuan_desa_kelurahan': _desaTujCtrl.text,
+    'tujuan_kecamatan'    : _kecTujCtrl.text,
+    'tujuan_kabupaten_kota': _kabTujCtrl.text,
+    'tujuan_provinsi'     : _provTujCtrl.text,
+    'tujuan_kode_pos'     : _kodeTujCtrl.text,
+    'alasan_pindah'       : _alasan,
+    'daftar_anggota_pindah': _anggota.map((a) => {
+      'anggota_nik'         : a.nikCtrl.text,
+      'anggota_nama_lengkap': a.namaCtrl.text,
+      'anggota_shdk'        : a.shdk,
     }).toList(),
   };
 
@@ -169,8 +167,8 @@ class _F103State extends State<FormulirPerpindahanPendudukScreen> {
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(initialValue: _klarifikasi,
           decoration: dropdownDeco('Pilih klarifikasi kepindahan'),
-          items: _klarifikasiList.map((e) => DropdownMenuItem(value: e,
-              child: Text(e, style: GoogleFonts.poppins(fontSize: 12)))).toList(),
+          items: _klarifikasiList.map((pair) => DropdownMenuItem(value: pair[1],
+              child: Text(pair[0], style: GoogleFonts.poppins(fontSize: 12)))).toList(),
           onChanged: (v) => setState(() => _klarifikasi = v),
           validator: (v) => v == null ? 'Wajib dipilih' : null),
         const SizedBox(height: 14),
