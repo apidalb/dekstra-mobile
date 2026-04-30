@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart' show kIsWeb, ValueNotifier;
+import 'package:flutter/foundation.dart' show ValueNotifier;
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 final homeTabIndex = ValueNotifier<int>(0);
 
 // ── Base URL ──────────────────────────────────────────────────────────────────
-const String kBaseUrl = 'https://dekstra-capstone.site';
+const String kBaseUrl = 'https://api.dekstra-capstone.site';
 
 // ════════════════════════════════════════════════════════════════════════════
 // Token storage helpers

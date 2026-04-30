@@ -33,9 +33,6 @@ class _LoginScreenState extends State<LoginScreen> {
   // Pesan error — ditampilkan sebagai banner merah
   String? _errorMessage;
 
-  // OTP yang dikembalikan dari backend (sementara ditampilkan di dev hint)
-  String? _receivedOtp;
-
   // Timer OTP (5 menit) dan cooldown kirim ulang (30 detik)
   Timer? _otpTimer;
   Timer? _resendTimer;
@@ -120,15 +117,13 @@ class _LoginScreenState extends State<LoginScreen> {
       final identifier = _identifierController.text.trim();
       final password   = _passwordController.text;
 
-      final res = await ApiService.requestLoginOtp(
+      await ApiService.requestLoginOtp(
         identifier: identifier,
         password  : password,
       );
 
       if (!mounted) return;
       setState(() {
-        // Backend mengembalikan OTP di response body (dev mode)
-        _receivedOtp  = res['otp']?.toString();
         _step         = 1;
         _errorMessage = null;
       });
@@ -160,6 +155,14 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (!mounted) return;
+      // Hanya warga (peran == 1) yang boleh menggunakan aplikasi ini
+      if ((data['peran'] as int? ?? 0) != 1) {
+        await clearTokens();
+        if (!mounted) return;
+        setState(() => _errorMessage =
+            'Aplikasi ini hanya untuk warga. Perangkat desa menggunakan portal web.');
+        return;
+      }
       // Token & user info sudah disimpan di ApiService.login()
       final email = data['email'] as String? ?? '';
 
@@ -217,11 +220,10 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final res = await ApiService.requestLoginOtp(
+      await ApiService.requestLoginOtp(
         identifier: _identifierController.text.trim(),
         password  : _passwordController.text,
       );
-      if (mounted) setState(() => _receivedOtp = res['otp']?.toString());
     } catch (_) {}
 
     if (!mounted) return;
@@ -489,22 +491,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ],
           ),
 
-          // Dev hint: tampilkan OTP yang diterima dari backend (hanya saat development)
-          if (_receivedOtp != null) ...[
-            const SizedBox(height: 20),
-            _demoHint(
-              children: [
-                Text(
-                  'OTP (Development) : $_receivedOtp',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: AppTheme.primaryDark,
-                    height: 1.7,
-                  ),
-                ),
-              ],
-            ),
-          ],
         ],
       ),
     );
@@ -604,39 +590,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         const SizedBox(height: 16),
       ],
-    );
-  }
-
-  Widget _demoHint({required List<Widget> children}) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryLight,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.info_outline,
-                  color: AppTheme.primary, size: 16),
-              const SizedBox(width: 6),
-              Text(
-                'Akun Demo',
-                style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          ...children,
-        ],
-      ),
     );
   }
 
