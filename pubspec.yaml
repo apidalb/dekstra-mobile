@@ -1,5 +1,5 @@
-name: desktra
-description: DESKTRA - Aplikasi Layanan Surat Digital
+name: dekstra
+description: DEKSTRA - Aplikasi Layanan Surat Digital
 
 publish_to: 'none'
 
@@ -13,13 +13,24 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.6
   google_fonts: ^6.1.0
-  # Digunakan untuk fitur unggah foto KK dan KTP pada halaman pendaftaran
+  http: ^1.2.0
+  shared_preferences: ^2.2.2
   image_picker: ^1.0.7
+  url_launcher: ^6.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/images/app_icon.png"
+  min_sdk_android: 21
+  web:
+    generate: false
 
 flutter:
   uses-material-design: true
