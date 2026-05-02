@@ -13,6 +13,7 @@ class _SKTempatUsahaState extends State<SuratKeteranganTempatUsahaScreen> {
   final _fk2 = GlobalKey<FormState>();
 
   // Data Pemohon
+  final _nikCtrl    = TextEditingController();
   final _namaCtrl   = TextEditingController();
   final _nibCtrl    = TextEditingController();
   final _npwpCtrl   = TextEditingController();
@@ -26,12 +27,13 @@ class _SKTempatUsahaState extends State<SuratKeteranganTempatUsahaScreen> {
 
   @override
   void dispose() {
-    for (final c in [_namaCtrl, _nibCtrl, _npwpCtrl, _alamatCtrl,
+    for (final c in [_nikCtrl, _namaCtrl, _nibCtrl, _npwpCtrl, _alamatCtrl,
       _namaUsahaCtrl, _jenisUsahaCtrl, _alamatUsahaCtrl, _tujuanCtrl]) { c.dispose(); }
     super.dispose();
   }
 
   Future<Map<String, dynamic>> _buildPayload() async => {
+    'nik'              : _nikCtrl.text,
     'nama_lengkap'     : _namaCtrl.text,
     'nib'              : _nibCtrl.text,
     'npwp'             : _npwpCtrl.text,
@@ -48,6 +50,15 @@ class _SKTempatUsahaState extends State<SuratKeteranganTempatUsahaScreen> {
       sectionCard(children: [
         sectionHeader('Data Pemohon'),
         const SizedBox(height: 16),
+        fieldLabel('NIK', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _nikCtrl,
+          keyboardType: TextInputType.number,
+          inputFormatters: nikFormatters,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan 16 digit NIK'),
+          validator: validateNIK),
+        const SizedBox(height: 14),
         fieldLabel('Nama Lengkap', required: true),
         const SizedBox(height: 6),
         TextFormField(controller: _namaCtrl,

@@ -118,7 +118,9 @@ class _KkBaruState extends State<FormulirKkBaruScreen> {
         const SizedBox(height: 14),
         fieldLabel('No. Telepon', required: true),
         const SizedBox(height: 6),
-        TextFormField(controller: _noTelpCtrl, keyboardType: TextInputType.phone,
+        TextFormField(controller: _noTelpCtrl,
+          keyboardType: TextInputType.phone,
+          inputFormatters: angkaFormatters,
           style: GoogleFonts.poppins(fontSize: 13),
           decoration: const InputDecoration(hintText: 'Contoh: 081234567890'),
           validator: validatePhone),
@@ -153,7 +155,7 @@ class _KkBaruState extends State<FormulirKkBaruScreen> {
           style: GoogleFonts.poppins(fontSize: 13),
           decoration: const InputDecoration(
               hintText: 'Masukkan jumlah anggota keluarga', suffixText: 'Orang'),
-          validator: (v) => validateRequired(v, 'Jumlah anggota')),
+          validator: (v) => validateNonZeroInt(v, 'Jumlah anggota')),
       ]),
     ]),
   );

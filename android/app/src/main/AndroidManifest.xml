@@ -2,7 +2,7 @@
     <!-- Izin akses internet untuk komunikasi dengan backend API -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="desktra"
+        android:label="DEKSTRA"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

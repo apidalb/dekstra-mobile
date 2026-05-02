@@ -45,32 +45,27 @@ class _PindahState extends State<SuratKeteranganPindahScreen> {
     super.dispose();
   }
 
-  Future<Map<String, dynamic>> _buildPayload() async {
-    final payload = <String, dynamic>{
-      'nama_lengkap'  : _namaCtrl.text,
-      'nik'           : _nikCtrl.text,
-      'no_kk'         : _noKkCtrl.text,
-      'tempat_lahir'  : _tempatCtrl.text,
-      'tanggal_lahir' : ddmmyyyyToIso(_tglCtrl.text),
-      'jenis_kelamin' : _jk,
-      'agama'         : _agama,
-      'pekerjaan'     : _pekerjaanCtrl.text,
-      'status'        : _status,
-      'kewarganegaraan': _kwrg,
-      'alamat'        : _alamatCtrl.text,
-      'alasan'        : _alasan,
-      'jumlah_pindah' : _anggota.length.toString(),
-    };
-    for (var i = 0; i < 6; i++) {
-      final slot = i + 1;
-      final a = i < _anggota.length ? _anggota[i] : null;
-      payload['nik_$slot']          = a?.nikCtrl.text ?? '';
-      payload['nama_lengkap_$slot'] = a?.namaCtrl.text ?? '';
-      payload['jenis_kelamin_$slot'] = a?.jk ?? '';
-      payload['shdk_$slot']         = a?.shdk ?? '';
-    }
-    return payload;
-  }
+  Future<Map<String, dynamic>> _buildPayload() async => {
+    'nama_lengkap'                  : _namaCtrl.text,
+    'nik'                           : _nikCtrl.text,
+    'nomor_kk'                      : _noKkCtrl.text,
+    'tempat_lahir'                  : _tempatCtrl.text,
+    'tanggal_lahir'                 : ddmmyyyyToIso(_tglCtrl.text),
+    'jenis_kelamin'                 : _jk,
+    'agama'                         : _agama,
+    'pekerjaan'                     : _pekerjaanCtrl.text,
+    'status'                        : _status,
+    'kewarganegaraan'               : _kwrg,
+    'alamat'                        : _alamatCtrl.text,
+    'alasan_pindah'                 : _alasan,
+    'jumlah_anggota_keluarga_pindah': _anggota.length.toString(),
+    'anggota_keluarga_pindah'       : _anggota.map((a) => {
+      'anggota_nik'           : a.nikCtrl.text,
+      'anggota_nama'          : a.namaCtrl.text,
+      'anggota_jenis_kelamin' : a.jk ?? '',
+      'anggota_shdk'          : a.shdk ?? '',
+    }).toList(),
+  };
 
   Widget _buildDataPemohon() => Form(
     key: _fk1,

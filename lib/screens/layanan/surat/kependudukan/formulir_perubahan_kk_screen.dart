@@ -234,7 +234,7 @@ class _PerubahanKkState extends State<FormulirPerubahanKkScreen> {
           style: GoogleFonts.poppins(fontSize: 13),
           decoration: const InputDecoration(
               hintText: 'Masukkan jumlah anggota keluarga', suffixText: 'Orang'),
-          validator: (v) => validateRequired(v, 'Jumlah anggota')),
+          validator: (v) => validateNonZeroInt(v, 'Jumlah anggota')),
       ]),
       const SizedBox(height: 16),
       buildTabelAnggota(_anggota, setState),

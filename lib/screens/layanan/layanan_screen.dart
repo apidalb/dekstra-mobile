@@ -29,7 +29,7 @@ class _JenisSurat {
   const _JenisSurat({required this.nama, required this.deskripsi});
 }
 
-// ── Data dummy surat ──────────────────────────────────────────────────────────
+// ── Data layanan surat ────────────────────────────────────────────────────────
 const List<_JenisSurat> _layananUmum = [
   _JenisSurat(
     nama: 'Surat Keterangan Usaha',

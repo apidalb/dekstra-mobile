@@ -232,6 +232,13 @@ String? validatePhone(String? v) {
   return null;
 }
 
+String? validateNonZeroInt(String? v, String fieldName) {
+  if (v == null || v.trim().isEmpty) return '$fieldName wajib diisi';
+  final n = int.tryParse(v.trim());
+  if (n == null || n <= 0) return '$fieldName harus lebih dari 0';
+  return null;
+}
+
 // ── NIK input formatters ──────────────────────────────────────────────────────
 List<TextInputFormatter> get nikFormatters => [
       FilteringTextInputFormatter.digitsOnly,

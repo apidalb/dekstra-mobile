@@ -23,27 +23,36 @@ class _DomisiliState extends State<SuratKeteranganDomisiliScreen> {
   final _alamatCtrl    = TextEditingController();
   final _noKkCtrl      = TextEditingController();
   final _kepalaKkCtrl  = TextEditingController();
+  final _keperluanCtrl = TextEditingController();
+  final _namDesaCtrl   = TextEditingController();
+  final _namKecCtrl    = TextEditingController();
+  final _namKabCtrl    = TextEditingController();
 
   @override
   void dispose() {
     for (final c in [_namaCtrl, _nikCtrl, _tempatCtrl, _tglCtrl,
-      _pekerjaanCtrl, _alamatCtrl, _noKkCtrl, _kepalaKkCtrl]) { c.dispose(); }
+      _pekerjaanCtrl, _alamatCtrl, _noKkCtrl, _kepalaKkCtrl,
+      _keperluanCtrl, _namDesaCtrl, _namKecCtrl, _namKabCtrl]) { c.dispose(); }
     super.dispose();
   }
 
   Future<Map<String, dynamic>> _buildPayload() async => {
-    'nama_lengkap'  : _namaCtrl.text,
-    'nik'           : _nikCtrl.text,
-    'tempat_lahir'  : _tempatCtrl.text,
-    'tanggal_lahir' : ddmmyyyyToIso(_tglCtrl.text),
-    'jenis_kelamin' : _jk,
-    'agama'         : _agama,
-    'pekerjaan'     : _pekerjaanCtrl.text,
-    'status'         : _status,
-    'kewarganegaraan': _kwrg,
-    'alamat'         : _alamatCtrl.text,
-    'no_kk'          : _noKkCtrl.text,
+    'nama_lengkap'        : _namaCtrl.text,
+    'nik'                 : _nikCtrl.text,
+    'tempat_lahir'        : _tempatCtrl.text,
+    'tanggal_lahir'       : ddmmyyyyToIso(_tglCtrl.text),
+    'jenis_kelamin'       : _jk,
+    'agama'               : _agama,
+    'pekerjaan'           : _pekerjaanCtrl.text,
+    'status_perkawinan'   : _status,
+    'kewarganegaraan'     : _kwrg,
+    'alamat'              : _alamatCtrl.text,
+    'nomor_kk'            : _noKkCtrl.text,
     'nama_kepala_keluarga': _kepalaKkCtrl.text,
+    'keperluan'           : _keperluanCtrl.text,
+    'nama_desa'           : _namDesaCtrl.text,
+    'nama_kecamatan'      : _namKecCtrl.text,
+    'nama_kabupaten'      : _namKabCtrl.text,
   };
 
   Widget _buildDataPemohon() => Form(
@@ -151,6 +160,34 @@ class _DomisiliState extends State<SuratKeteranganDomisiliScreen> {
           style: GoogleFonts.poppins(fontSize: 13),
           decoration: const InputDecoration(hintText: 'Masukkan nama kepala keluarga'),
           validator: (v) => validateRequired(v, 'Nama kepala keluarga')),
+        const SizedBox(height: 14),
+        fieldLabel('Keperluan', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _keperluanCtrl,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Contoh: Mengurus keperluan administrasi'),
+          validator: (v) => validateRequired(v, 'Keperluan')),
+        const SizedBox(height: 14),
+        fieldLabel('Nama Desa/Kelurahan', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _namDesaCtrl,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Contoh: Sragen Tengah'),
+          validator: (v) => validateRequired(v, 'Nama desa')),
+        const SizedBox(height: 14),
+        fieldLabel('Nama Kecamatan', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _namKecCtrl,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Contoh: Sragen'),
+          validator: (v) => validateRequired(v, 'Nama kecamatan')),
+        const SizedBox(height: 14),
+        fieldLabel('Nama Kabupaten/Kota', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _namKabCtrl,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Contoh: Kabupaten Sragen'),
+          validator: (v) => validateRequired(v, 'Nama kabupaten/kota')),
       ]),
     ]),
   );

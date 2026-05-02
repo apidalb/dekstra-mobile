@@ -13,13 +13,33 @@ class _KelahiranState extends State<SuratKeteranganKelahiranScreen> {
   final _fk1 = GlobalKey<FormState>();
   final _fk2 = GlobalKey<FormState>();
   final _fk3 = GlobalKey<FormState>();
+  final _fk4 = GlobalKey<FormState>();
 
   // Data Anak
-  final _namaAnakCtrl     = TextEditingController();
+  final _namaAnakCtrl      = TextEditingController();
   String? _jkAnak;
-  final _tglLahirAnakCtrl = TextEditingController();
-  final _waktuLahirCtrl   = TextEditingController();
-  final _anakKeCtrl       = TextEditingController();
+  final _tglLahirAnakCtrl  = TextEditingController();
+  final _tempatAnakCtrl    = TextEditingController();
+  final _waktuLahirCtrl    = TextEditingController();
+  final _anakKeCtrl        = TextEditingController();
+
+  // Data Saksi 1
+  final _namaSaksi1Ctrl    = TextEditingController();
+  final _nikSaksi1Ctrl     = TextEditingController();
+  final _tempatSaksi1Ctrl  = TextEditingController();
+  final _tglSaksi1Ctrl     = TextEditingController();
+  String? _kwrgSaksi1;
+  final _pkrSaksi1Ctrl     = TextEditingController();
+  final _alamatSaksi1Ctrl  = TextEditingController();
+
+  // Data Saksi 2
+  final _namaSaksi2Ctrl    = TextEditingController();
+  final _nikSaksi2Ctrl     = TextEditingController();
+  final _tempatSaksi2Ctrl  = TextEditingController();
+  final _tglSaksi2Ctrl     = TextEditingController();
+  String? _kwrgSaksi2;
+  final _pkrSaksi2Ctrl     = TextEditingController();
+  final _alamatSaksi2Ctrl  = TextEditingController();
 
   // Data Ayah
   final _namaAyahCtrl      = TextEditingController();
@@ -44,37 +64,56 @@ class _KelahiranState extends State<SuratKeteranganKelahiranScreen> {
   @override
   void dispose() {
     for (final c in [
-      _namaAnakCtrl, _tglLahirAnakCtrl, _waktuLahirCtrl, _anakKeCtrl,
+      _namaAnakCtrl, _tglLahirAnakCtrl, _tempatAnakCtrl, _waktuLahirCtrl, _anakKeCtrl,
       _namaAyahCtrl, _nikAyahCtrl, _tempatAyahCtrl, _tglAyahCtrl,
       _pekerjaanAyahCtrl, _alamatAyahCtrl,
       _namaIbuCtrl, _nikIbuCtrl, _tempatIbuCtrl, _tglIbuCtrl,
       _pekerjaanIbuCtrl, _alamatIbuCtrl,
+      _namaSaksi1Ctrl, _nikSaksi1Ctrl, _tempatSaksi1Ctrl, _tglSaksi1Ctrl,
+      _pkrSaksi1Ctrl, _alamatSaksi1Ctrl,
+      _namaSaksi2Ctrl, _nikSaksi2Ctrl, _tempatSaksi2Ctrl, _tglSaksi2Ctrl,
+      _pkrSaksi2Ctrl, _alamatSaksi2Ctrl,
     ]) { c.dispose(); }
     super.dispose();
   }
 
   Future<Map<String, dynamic>> _buildPayload() async => {
-    'nama_anak'          : _namaAnakCtrl.text,
-    'jenis_kelamin_anak' : _jkAnak,
-    'tanggal_lahir_anak' : ddmmyyyyToIso(_tglLahirAnakCtrl.text),
-    'waktu_lahir'        : _waktuLahirCtrl.text,
-    'anak_ke'            : _anakKeCtrl.text,
-    'nama_ayah'          : _namaAyahCtrl.text,
-    'nik_ayah'           : _nikAyahCtrl.text,
-    'tempat_lahir_ayah'  : _tempatAyahCtrl.text,
-    'tanggal_lahir_ayah' : ddmmyyyyToIso(_tglAyahCtrl.text),
-    'agama_ayah'         : _agamaAyah,
-    'pekerjaan_ayah'     : _pekerjaanAyahCtrl.text,
-    'kewarganegaraan_ayah': _kwrgAyah,
-    'alamat_ayah'        : _alamatAyahCtrl.text,
-    'nama_ibu'           : _namaIbuCtrl.text,
-    'nik_ibu'            : _nikIbuCtrl.text,
-    'tempat_lahir_ibu'   : _tempatIbuCtrl.text,
-    'tanggal_lahir_ibu'  : ddmmyyyyToIso(_tglIbuCtrl.text),
-    'agama_ibu'          : _agamaIbu,
-    'pekerjaan_ibu'      : _pekerjaanIbuCtrl.text,
-    'kewarganegaraan_ibu': _kwrgIbu,
-    'alamat_ibu'         : _alamatIbuCtrl.text,
+    'nama_anak'              : _namaAnakCtrl.text,
+    'jenis_kelamin_anak'     : _jkAnak,
+    'tanggal_lahir_anak'     : ddmmyyyyToIso(_tglLahirAnakCtrl.text),
+    'tempat_lahir_anak'      : _tempatAnakCtrl.text,
+    'waktu_lahir_anak'       : _waktuLahirCtrl.text,
+    'anak_ke'                : _anakKeCtrl.text,
+    'nama_ayah'              : _namaAyahCtrl.text,
+    'nik_ayah'               : _nikAyahCtrl.text,
+    'tempat_lahir_ayah'      : _tempatAyahCtrl.text,
+    'tanggal_lahir_ayah'     : ddmmyyyyToIso(_tglAyahCtrl.text),
+    'agama_ayah'             : _agamaAyah,
+    'pekerjaan_ayah'         : _pekerjaanAyahCtrl.text,
+    'kewarganegaraan_ayah'   : _kwrgAyah,
+    'alamat_ayah'            : _alamatAyahCtrl.text,
+    'nama_ibu'               : _namaIbuCtrl.text,
+    'nik_ibu'                : _nikIbuCtrl.text,
+    'tempat_lahir_ibu'       : _tempatIbuCtrl.text,
+    'tanggal_lahir_ibu'      : ddmmyyyyToIso(_tglIbuCtrl.text),
+    'agama_ibu'              : _agamaIbu,
+    'pekerjaan_ibu'          : _pekerjaanIbuCtrl.text,
+    'kewarganegaraan_ibu'    : _kwrgIbu,
+    'alamat_ibu'             : _alamatIbuCtrl.text,
+    'nama_saksi_1'           : _namaSaksi1Ctrl.text,
+    'nik_saksi_1'            : _nikSaksi1Ctrl.text,
+    'tempat_lahir_saksi_1'   : _tempatSaksi1Ctrl.text,
+    'tanggal_lahir_saksi_1'  : ddmmyyyyToIso(_tglSaksi1Ctrl.text),
+    'kewarganegaraan_saksi_1': _kwrgSaksi1,
+    'pekerjaan_saksi_1'      : _pkrSaksi1Ctrl.text,
+    'alamat_saksi_1'         : _alamatSaksi1Ctrl.text,
+    'nama_saksi_2'           : _namaSaksi2Ctrl.text,
+    'nik_saksi_2'            : _nikSaksi2Ctrl.text,
+    'tempat_lahir_saksi_2'   : _tempatSaksi2Ctrl.text,
+    'tanggal_lahir_saksi_2'  : ddmmyyyyToIso(_tglSaksi2Ctrl.text),
+    'kewarganegaraan_saksi_2': _kwrgSaksi2,
+    'pekerjaan_saksi_2'      : _pkrSaksi2Ctrl.text,
+    'alamat_saksi_2'         : _alamatSaksi2Ctrl.text,
   };
 
   Widget _buildDataAnak() => Form(
@@ -107,6 +146,13 @@ class _KelahiranState extends State<SuratKeteranganKelahiranScreen> {
           decoration: const InputDecoration(hintText: 'dd/mm/yyyy',
               suffixIcon: Icon(Icons.calendar_today, size: 16)),
           validator: (v) => validateDate(v, 'Tanggal lahir')),
+        const SizedBox(height: 14),
+        fieldLabel('Tempat Lahir', required: true),
+        const SizedBox(height: 6),
+        TextFormField(controller: _tempatAnakCtrl,
+          style: GoogleFonts.poppins(fontSize: 13),
+          decoration: const InputDecoration(hintText: 'Masukkan tempat lahir anak'),
+          validator: (v) => validateRequired(v, 'Tempat lahir')),
         const SizedBox(height: 14),
         fieldLabel('Waktu Lahir', required: true),
         const SizedBox(height: 6),
@@ -203,6 +249,80 @@ class _KelahiranState extends State<SuratKeteranganKelahiranScreen> {
     ]),
   );
 
+  Widget _buildDataSaksi() => Form(
+    key: _fk4,
+    child: Column(children: [
+      ...[
+        ('Saksi 1', _namaSaksi1Ctrl, _nikSaksi1Ctrl, _tempatSaksi1Ctrl,
+          _tglSaksi1Ctrl, _kwrgSaksi1,
+          (String? v) => setState(() => _kwrgSaksi1 = v),
+          _pkrSaksi1Ctrl, _alamatSaksi1Ctrl),
+        ('Saksi 2', _namaSaksi2Ctrl, _nikSaksi2Ctrl, _tempatSaksi2Ctrl,
+          _tglSaksi2Ctrl, _kwrgSaksi2,
+          (String? v) => setState(() => _kwrgSaksi2 = v),
+          _pkrSaksi2Ctrl, _alamatSaksi2Ctrl),
+      ].map((s) {
+        final (label, nama, nik, tempat, tgl, kwrg, onKwrg, pkr, alamat) = s;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: sectionCard(children: [
+            sectionHeader(label),
+            const SizedBox(height: 16),
+            fieldLabel('Nama Lengkap', required: true),
+            const SizedBox(height: 6),
+            TextFormField(controller: nama, style: GoogleFonts.poppins(fontSize: 13),
+              decoration: InputDecoration(hintText: 'Masukkan nama $label'),
+              validator: (v) => validateRequired(v, 'Nama')),
+            const SizedBox(height: 14),
+            fieldLabel('NIK', required: true),
+            const SizedBox(height: 6),
+            TextFormField(controller: nik, keyboardType: TextInputType.number,
+              inputFormatters: nikFormatters, style: GoogleFonts.poppins(fontSize: 13),
+              decoration: const InputDecoration(hintText: 'Masukkan 16 digit NIK'),
+              validator: validateNIK),
+            const SizedBox(height: 14),
+            fieldLabel('Tempat Lahir', required: true),
+            const SizedBox(height: 6),
+            TextFormField(controller: tempat, style: GoogleFonts.poppins(fontSize: 13),
+              decoration: const InputDecoration(hintText: 'Masukkan tempat lahir'),
+              validator: (v) => validateRequired(v, 'Tempat lahir')),
+            const SizedBox(height: 14),
+            fieldLabel('Tanggal Lahir', required: true),
+            const SizedBox(height: 6),
+            TextFormField(controller: tgl, readOnly: true,
+              onTap: () => pickDate(context, tgl),
+              style: GoogleFonts.poppins(fontSize: 13),
+              decoration: const InputDecoration(hintText: 'dd/mm/yyyy',
+                  suffixIcon: Icon(Icons.calendar_today, size: 16)),
+              validator: (v) => validateDate(v, 'Tanggal lahir')),
+            const SizedBox(height: 14),
+            fieldLabel('Kewarganegaraan', required: true),
+            const SizedBox(height: 6),
+            DropdownButtonFormField<String>(initialValue: kwrg,
+              decoration: dropdownDeco('Pilih kewarganegaraan'),
+              items: kKewarganegaraanList.map((e) => DropdownMenuItem(value: e,
+                  child: Text(e, style: GoogleFonts.poppins(fontSize: 13)))).toList(),
+              onChanged: onKwrg,
+              validator: (v) => v == null ? 'Kewarganegaraan wajib dipilih' : null),
+            const SizedBox(height: 14),
+            fieldLabel('Pekerjaan', required: true),
+            const SizedBox(height: 6),
+            TextFormField(controller: pkr, style: GoogleFonts.poppins(fontSize: 13),
+              decoration: const InputDecoration(hintText: 'Masukkan pekerjaan'),
+              validator: (v) => validateRequired(v, 'Pekerjaan')),
+            const SizedBox(height: 14),
+            fieldLabel('Alamat', required: true),
+            const SizedBox(height: 6),
+            TextFormField(controller: alamat, maxLines: 2,
+              style: GoogleFonts.poppins(fontSize: 13),
+              decoration: const InputDecoration(hintText: 'Masukkan alamat'),
+              validator: (v) => validateRequired(v, 'Alamat')),
+          ]),
+        );
+      }),
+    ]),
+  );
+
   @override
   Widget build(BuildContext context) => SuratStepperPage(
     appBarTitle: 'Surat Ket. Kelahiran',
@@ -225,6 +345,8 @@ class _KelahiranState extends State<SuratKeteranganKelahiranScreen> {
           pekerjaan: _pekerjaanIbuCtrl,
           kwrg: _kwrgIbu, onKwrg: (v) => setState(() => _kwrgIbu = v),
           alamat: _alamatIbuCtrl)),
+      SuratDataStep(title: 'Data Saksi',
+        formKey: _fk4, content: _buildDataSaksi()),
     ],
     jenisSurat: 'B10',
     onBuildPayload: _buildPayload,
