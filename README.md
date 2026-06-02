@@ -56,18 +56,34 @@ lib/
 
 ## Jenis Surat
 
-| Kode | Nama Surat |
-|---|---|
-| A01 | Surat Keterangan Usaha |
-| A02 | Surat Keterangan Tempat Usaha |
-| B03 | Formulir KK Baru (F-1.08) |
-| B04 | Formulir Perubahan KK (F-1.16) |
-| B05 | Formulir Permohonan KTP |
-| B06 | Surat Keterangan Domisili |
-| B07 | Surat Keterangan Tidak Mampu |
-| B08 | Surat Keterangan Pindah |
-| B09 | Surat Keterangan Kematian |
-| B10 | Surat Keterangan Kelahiran |
+**Layanan Umum (8)**
+
+| Nama Surat |
+|---|
+| Surat Keterangan Usaha |
+| Surat Keterangan Tempat Usaha |
+| Surat Keterangan Pengantar Barang |
+| Surat Keterangan Tidak Mampu (Sekolah) |
+| Permohonan Izin Keramaian / Pesta |
+| Surat Pengantar SKCK |
+| Surat Keterangan Ahli Waris |
+| Surat Keterangan Lainnya |
+
+**Layanan Kependudukan (11)**
+
+| Nama Surat |
+|---|
+| Formulir Kartu Keluarga (F-1.01) |
+| Formulir Pendaftaran Peristiwa Kependudukan (F-1.02) |
+| Formulir Permohonan KK Baru WNI (F-1.15) |
+| Formulir Permohonan Perubahan KK WNI (F-1.16) |
+| Formulir Permohonan KTP (F-1.21) |
+| Surat Keterangan Domisili |
+| Surat Keterangan Hilang Kartu Keluarga |
+| Surat Keterangan Pindah |
+| Formulir Pendaftaran Perpindahan Penduduk (F-1.03) |
+| Surat Keterangan Kelahiran (F-2.01) |
+| Surat Keterangan Kematian (F-2.29) |
 
 ---
 
