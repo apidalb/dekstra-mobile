@@ -1,12 +1,12 @@
-# DEKSTRA — Aplikasi Layanan Surat Digital Desa
+# DEKSTRA — Digital Village Letter Service Application
 
-Aplikasi mobile Flutter untuk pengurusan surat kependudukan dan umum secara digital di tingkat desa/kelurahan.
+A Flutter mobile application for processing administrative and civil registration letters digitally at the village level.
 
 ---
 
 ## Tech Stack
 
-| Layer | Teknologi |
+| Layer | Technology |
 |---|---|
 | Mobile | Flutter (Dart) |
 | Backend | Django REST Framework |
@@ -17,24 +17,24 @@ Aplikasi mobile Flutter untuk pengurusan surat kependudukan dan umum secara digi
 
 ---
 
-## Cara Menjalankan
+## Getting Started
 
-**Prasyarat:** Flutter SDK ≥ 3.x, Android Studio atau VS Code
+**Prerequisites:** Flutter SDK ≥ 3.x, Android Studio or VS Code
 
 ```bash
 # Install dependencies
 flutter pub get
 
-# Jalankan di emulator/device
+# Run on emulator/device
 flutter run
 
-# Build APK release
+# Build release APK
 flutter build apk --release
 ```
 
 ---
 
-## Struktur Layar
+## Screen Structure
 
 ```
 lib/
@@ -44,46 +44,46 @@ lib/
 │   └── api_service.dart
 └── screens/
     ├── auth/          # Splash, Login, Register, Reset Password
-    ├── beranda/       # Home, Notifikasi
-    ├── profil/        # Profil pengguna
+    ├── beranda/       # Home, Notifications, History, Request Detail
+    ├── profil/        # User profile
     └── layanan/
         └── surat/
-            ├── umum/           # A01 SKU, A02 SK Tempat Usaha
-            └── kependudukan/   # B03–B10
+            ├── umum/           # General letters (8 types)
+            └── kependudukan/   # Civil registration letters (11 types)
 ```
 
 ---
 
-## Jenis Surat
+## Letter Services
 
-**Layanan Umum (8)**
+**General Letters (8)**
 
-| Nama Surat |
+| Letter Name |
 |---|
-| Surat Keterangan Usaha |
-| Surat Keterangan Tempat Usaha |
-| Surat Keterangan Pengantar Barang |
-| Surat Keterangan Tidak Mampu (Sekolah) |
-| Permohonan Izin Keramaian / Pesta |
-| Surat Pengantar SKCK |
-| Surat Keterangan Ahli Waris |
-| Surat Keterangan Lainnya |
+| Business Certificate |
+| Business Location Certificate |
+| Goods Delivery Cover Letter |
+| Certificate of Underprivilege (Education) |
+| Permit for Public Gatherings / Events |
+| Police Record (SKCK) Cover Letter |
+| Certificate of Heir |
+| Other General Certificate |
 
-**Layanan Kependudukan (11)**
+**Civil Registration Letters (11)**
 
-| Nama Surat |
+| Letter Name |
 |---|
-| Formulir Kartu Keluarga (F-1.01) |
-| Formulir Pendaftaran Peristiwa Kependudukan (F-1.02) |
-| Formulir Permohonan KK Baru WNI (F-1.15) |
-| Formulir Permohonan Perubahan KK WNI (F-1.16) |
-| Formulir Permohonan KTP (F-1.21) |
-| Surat Keterangan Domisili |
-| Surat Keterangan Hilang Kartu Keluarga |
-| Surat Keterangan Pindah |
-| Formulir Pendaftaran Perpindahan Penduduk (F-1.03) |
-| Surat Keterangan Kelahiran (F-2.01) |
-| Surat Keterangan Kematian (F-2.29) |
+| Family Card Form (F-1.01) |
+| Civil Event Registration Form (F-1.02) |
+| New Family Card Application — Indonesian Citizen (F-1.15) |
+| Family Card Amendment Application — Indonesian Citizen (F-1.16) |
+| National ID Card Application (F-1.21) |
+| Certificate of Domicile |
+| Certificate of Lost Family Card |
+| Certificate of Relocation |
+| Resident Relocation Registration Form (F-1.03) |
+| Birth Certificate (F-2.01) |
+| Death Certificate (F-2.29) |
 
 ---
 
@@ -91,44 +91,44 @@ lib/
 
 **Base URL:** `https://api.dekstra-capstone.site`
 
-### Wilayah
+### Area / Region
 
-| Method | Endpoint | Auth | Deskripsi |
+| Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| GET | `/wilayah/rw/` | — | Daftar semua RW |
-| GET | `/wilayah/rt/?rw={kodeRw}` | — | Daftar RT berdasarkan RW |
+| GET | `/wilayah/rw/` | — | List all RW (neighbourhood units) |
+| GET | `/wilayah/rt/?rw={kodeRw}` | — | List RT by RW |
 
-### Autentikasi
+### Authentication
 
-| Method | Endpoint | Auth | Deskripsi |
+| Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| POST | `/auth/register/` | — | Registrasi akun baru (multipart/form-data) |
-| POST | `/auth/otp/request/login/` | — | Request OTP login ke email |
-| POST | `/auth/login/` | — | Login dengan OTP, terima JWT |
-| POST | `/auth/otp/request/reset-password/` | — | Request OTP reset password |
-| POST | `/auth/otp/verify/reset-password/` | — | Verifikasi OTP & ganti password |
+| POST | `/auth/register/` | — | Register new account (multipart/form-data) |
+| POST | `/auth/otp/request/login/` | — | Request login OTP via email |
+| POST | `/auth/login/` | — | Login with OTP, receive JWT |
+| POST | `/auth/otp/request/reset-password/` | — | Request password reset OTP |
+| POST | `/auth/otp/verify/reset-password/` | — | Verify OTP & set new password |
 | POST | `/auth/refresh/` | — | Refresh access token |
 
 **Login Flow:**
-1. `POST /auth/otp/request/login/` → OTP dikirim ke email
-2. `POST /auth/login/` dengan OTP → terima `access` + `refresh` JWT
+1. `POST /auth/otp/request/login/` → OTP sent to email
+2. `POST /auth/login/` with OTP → receive `access` + `refresh` JWT
 
 **Register Fields (multipart):** `nomor_kk`, `nik`, `nama_lengkap`, `jenis_kelamin` (int), `agama` (int), `tempat_lahir`, `tanggal_lahir` (YYYY-MM-DD), `alamat`, `rt` (id), `rw` (kode_rw), `email`, `no_hp`, `password`, `kk_file` (image), `ktp_file` (image)
 
-### Profil
+### Profile
 
-| Method | Endpoint | Auth | Deskripsi |
+| Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| GET | `/profil/` | Bearer | Data profil pengguna |
-| PUT | `/profil/` | Bearer | Update nama, no_hp, alamat |
+| GET | `/profil/` | Bearer | Get user profile |
+| PUT | `/profil/` | Bearer | Update name, phone, address |
 
-### Pengajuan Surat
+### Letter Submission
 
-| Method | Endpoint | Auth | Deskripsi |
+| Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| GET | `/pengajuan-surat/` | Bearer | Daftar permohonan aktif milik warga |
-| POST | `/pengajuan-surat/` | Bearer | Submit permohonan surat baru |
-| POST | `/upload/berkas-surat/` | Bearer | Upload berkas pendukung (multipart) |
+| GET | `/pengajuan-surat/` | Bearer | List active submissions |
+| POST | `/pengajuan-surat/` | Bearer | Submit a new letter request |
+| POST | `/upload/berkas-surat/` | Bearer | Upload supporting documents (multipart) |
 
 **Submit Payload:**
 ```json
@@ -138,34 +138,34 @@ lib/
 }
 ```
 
-### Riwayat Pengajuan
+### Submission History
 
-| Method | Endpoint | Auth | Deskripsi |
+| Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| GET | `/riwayat-pengajuan/` | Bearer | Riwayat permohonan (Disetujui/Ditolak) |
-| GET | `/riwayat-pengajuan/{nomor_permohonan}/` | Bearer | Detail + timeline permohonan |
+| GET | `/riwayat-pengajuan/` | Bearer | History of approved/rejected submissions |
+| GET | `/riwayat-pengajuan/{nomor_permohonan}/` | Bearer | Submission detail + timeline |
 
-### Notifikasi
+### Notifications
 
-| Method | Endpoint | Auth | Deskripsi |
+| Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| GET | `/notifikasi/` | Bearer | Daftar notifikasi milik user |
-| POST | `/notifikasi/{id}/read/` | Bearer | Tandai notifikasi sudah dibaca |
+| GET | `/notifikasi/` | Bearer | List user notifications |
+| POST | `/notifikasi/{id}/read/` | Bearer | Mark notification as read |
 
 ---
 
-## Alur Pengguna
+## User Flow
 
 ```
-Daftar → (Admin setujui akun) → Login (NIK/email + password + OTP)
-→ Pilih jenis surat → Isi formulir step-by-step → Submit
-→ Notifikasi status (RT → RW → Kepala Desa) → Surat selesai
+Register → (Admin approves account) → Login (NIK/email + password + OTP)
+→ Select letter type → Fill multi-step form → Submit
+→ Status notifications (RT → RW → Village Head) → Letter completed
 ```
 
 ---
 
-## Catatan
+## Notes
 
-- Hanya role **Warga** yang dapat menggunakan aplikasi mobile ini
-- Orientasi layar dikunci ke **portrait** (atas & bawah)
-- Token JWT disimpan di `SharedPreferences`, auto-refresh jika expired
+- Only the **Warga (Resident)** role can access this mobile application
+- Screen orientation is locked to **portrait** mode (up & down)
+- JWT tokens are stored in `SharedPreferences`, auto-refreshed when expired
