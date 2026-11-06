@@ -1,7 +1,7 @@
 # CLAUDE.md — DEKSTRA Mobile Project Context
 
 > Dokumen ini dibaca otomatis oleh Claude Code setiap sesi baru.
-> Terakhir diperbarui: 2026-10-28
+> Terakhir diperbarui: 2026-11-06
 
 ---
 
@@ -80,7 +80,7 @@ lib/
 - **Auth:** JWT (access + refresh token) + OTP email 2-step
 - **Endpoints utama:** lihat `README.md` untuk daftar lengkap
 
-**Catatan pengujian TA:** Backend perlu aktif untuk S2 (Riwayat Permohonan) agar data list ter-render. S1 (Splash) dan S3 (Formulir) tidak memerlukan backend aktif untuk mengukur performa rendering UI.
+**Catatan pengujian TA:** Backend perlu aktif untuk S2 (Riwayat Permohonan) agar data list ter-render. S1 (Splash, diuji tanpa token) dan S3 (Formulir, rekaman berhenti sebelum submit) tidak memerlukan backend aktif.
 
 ---
 
@@ -98,26 +98,32 @@ Saat ini project memasuki **fase pengujian BAB IV**. Lihat `docs/testing_protoco
 
 ### Kondisi Jaringan
 
-| Kode | Kondisi | Spesifikasi |
-|---|---|---|
-| J1 | Wi-Fi Normal | Koneksi stabil tanpa throttle |
-| J2 | 3G Simulasi | ~750 Kbps, latency ~300ms (Android Developer Options) |
+**Tidak ada variasi kondisi jaringan.** J1/J2 (Wi-Fi/3G) sudah dihapus dari BAB III; abaikan dokumen lama yang masih menyebutnya.
+
+### Keputusan Pengujian (November 2026)
+
+- **S1 diuji tanpa token**: keluar lewat Akun → Keluar (menutup aplikasi tidak menghapus token). Rekaman berakhir saat tombol Masuk/Daftar tampil. Seluruh iterasi S1 dijalankan sebelum S2/S3. Iterasi yang berpindah ke Beranda dibatalkan dan diulang.
+- **S3**: kolom teks memakai `TextEditingController`, jadi mengetik tidak memanggil `setState()` halaman. `setState()` halaman terjadi saat pindah tahap, memilih kategori, dan mencentang persyaratan. Rekaman S3 hanya mencakup tahap 1 → ketuk Lanjut → tahap 2 dimuat.
+- **M5 (rebuild count)** hanya bisa direkam di **mode debug** (Performance View → Rebuild Stats); tidak tersedia di mode profile, dan Widget Inspector tidak menghitung rebuild.
+- **M1–M4** dihitung dari berkas ekspor Performance View (DevTools tidak menampilkan angka agregat).
+- Mesin grafis: Impeller (Vulkan). Layar 60 Hz.
 
 ### Metrik yang Diukur (7 Metrik)
 
-1. Average frame build time (ms)
-2. Average raster time (ms)
-3. Worst frame build time (ms)
-4. Jank frames percentage (%)
-5. Widget rebuild count
-6. Peak heap usage (MB)
-7. CPU hot paths (%)
+1. Average frame build time (ms) — ekspor Performance View, mode profile
+2. Average raster time (ms) — ekspor Performance View, mode profile
+3. Worst frame build time (ms) — ekspor Performance View, mode profile
+4. Jank frames percentage (%) — build atau raster > 16,67 ms
+5. Widget rebuild count — Performance View → Rebuild Stats, **mode debug**
+6. Peak heap usage (MB) — Memory View
+7. CPU hot paths (%) — CPU Profiler
 
 ### Iterasi
 
-- **10 iterasi** per skenario per kondisi jaringan
+- **10 iterasi** per skenario (30 sesi profile + 30 sesi debug untuk M5)
 - **Iterasi 1** = warm-up, **dibuang** dari analisis
 - **Iterasi 2–10** = data valid (9 iterasi)
+- Analisis: rata-rata, min, maks, SD, interval kepercayaan 95%
 
 ### Perangkat Uji
 
@@ -162,6 +168,6 @@ Saat ini project memasuki **fase pengujian BAB IV**. Lihat `docs/testing_protoco
 ## 10. Konteks Tambahan (jangan lupakan)
 
 - Formatting TA: *State* dan *StatefulWidget* ditulis italic; `setState()` ditulis monospace Courier New
-- Jumlah referensi final: 14 referensi (bukan 15 — Ref [13] Balagovic sudah diganti)
+- Jumlah referensi final: **18 referensi** (per 2 November 2026; Syafarudin dihapus dan diganti BPS, ditambah 5 halaman dokumentasi Flutter)
 - Justifikasi 10 iterasi: Ceccato et al. (ICST 2020) — ANOVA power analysis; Georges et al. (OOPSLA 2007) — warm-up justification
-- Untuk checklist revisi BAB I–III yang masih pending: lihat di Project Memory claude.ai (project "Apid's Capstone and Thesis Projects")
+- Status revisi dan keputusan terbaru: lihat dokumen Project claude.ai `claude/status-ta-2026-11-02.md` (project "Apid's Capstone and Thesis Projects")
